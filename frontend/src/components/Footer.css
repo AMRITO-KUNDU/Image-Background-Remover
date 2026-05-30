@@ -1,6 +1,7 @@
 .footer {
-  border-top: 1px solid var(--color-border);
-  padding: 20px 24px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-low);
+  padding: 24px;
 }
 
 .footer-inner {
@@ -14,13 +15,14 @@
 }
 
 .footer-text {
-  font-size: 0.82rem;
-  color: var(--color-text-muted);
+  font-size: var(--md-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .footer-text a {
-  color: var(--color-accent);
+  color: var(--md-sys-color-primary);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .footer-text a:hover {
@@ -28,7 +30,13 @@
 }
 
 .footer-note {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--md-typescale-label-medium);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.footer-note .material-icons-round {
+  font-size: 14px;
 }

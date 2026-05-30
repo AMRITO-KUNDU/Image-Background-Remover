@@ -13,17 +13,32 @@ export default function ResultPanel({ originalUrl, resultUrl, loading, onReset, 
     a.click()
   }
 
+  const TABS = [
+    { id: 'original', label: 'Original', icon: 'photo' },
+    { id: 'result', label: 'Result', icon: 'auto_fix_high' },
+    { id: 'split', label: 'Compare', icon: 'compare' },
+  ]
+
+  const renderImage = (url, transparent = false) => (
+    url
+      ? <img src={url} alt={transparent ? 'Result' : 'Original'} className={`preview-img ${transparent ? 'checkerboard' : ''}`} />
+      : loading
+        ? <div className="state-placeholder"><div className="md-circular-progress" /><p>Removing background…</p></div>
+        : <div className="state-placeholder"><span className="material-icons-round">image_search</span><p>Result will appear here</p></div>
+  )
+
   return (
     <div className="result-panel">
       {resultUrl && (
-        <div className="result-tabs">
-          {['original', 'result', 'split'].map((v) => (
+        <div className="md-segmented-btn">
+          {TABS.map(t => (
             <button
-              key={v}
-              className={`tab ${view === v ? 'active' : ''}`}
-              onClick={() => setView(v)}
+              key={t.id}
+              className={`seg-btn ${view === t.id ? 'active' : ''}`}
+              onClick={() => setView(t.id)}
             >
-              {v.charAt(0).toUpperCase() + v.slice(1)}
+              <span className="material-icons-round">{view === t.id ? 'check' : t.icon}</span>
+              {t.label}
             </button>
           ))}
         </div>
@@ -32,59 +47,36 @@ export default function ResultPanel({ originalUrl, resultUrl, loading, onReset, 
       <div className="result-images">
         {view === 'split' && (
           <div className="split-view">
-            <div className="image-box">
-              <span className="image-label">Original</span>
+            <div className="image-column">
+              <span className="image-column-label">Original</span>
               <img src={originalUrl} alt="Original" className="preview-img" />
             </div>
-            <div className="split-divider" />
-            <div className="image-box">
-              <span className="image-label">Result</span>
-              {resultUrl ? (
-                <img src={resultUrl} alt="Result" className="preview-img checkerboard" />
-              ) : loading ? (
-                <div className="loading-placeholder">
-                  <div className="spinner" />
-                  <span>Processing…</span>
-                </div>
-              ) : (
-                <div className="empty-result">
-                  <span>Click "Remove Background" to process</span>
-                </div>
-              )}
+            <div className="image-column">
+              <span className="image-column-label">Result</span>
+              {renderImage(resultUrl, true)}
             </div>
           </div>
         )}
-
         {view === 'original' && (
           <div className="single-view">
             <img src={originalUrl} alt="Original" className="preview-img" />
           </div>
         )}
-
         {view === 'result' && (
           <div className="single-view">
-            {resultUrl ? (
-              <img src={resultUrl} alt="Result" className="preview-img checkerboard" />
-            ) : loading ? (
-              <div className="loading-placeholder">
-                <div className="spinner" />
-                <span>Processing…</span>
-              </div>
-            ) : (
-              <div className="empty-result">
-                <span>No result yet</span>
-              </div>
-            )}
+            {renderImage(resultUrl, true)}
           </div>
         )}
       </div>
 
       <div className="result-actions">
-        <button className="btn-secondary" onClick={onReset}>
-          New Image
+        <button className="md-btn-text" onClick={onReset}>
+          <span className="material-icons-round">refresh</span>
+          New image
         </button>
         {resultUrl && (
-          <button className="btn-download" onClick={handleDownload}>
+          <button className="md-btn-filled" onClick={handleDownload}>
+            <span className="material-icons-round">download</span>
             Download PNG
           </button>
         )}

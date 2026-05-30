@@ -1,3 +1,4 @@
+/* === M3 Upload Zone === */
 .upload-zone {
   flex: 1;
   width: 100%;
@@ -5,56 +6,132 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  border: 2px dashed var(--color-border);
-  border-radius: var(--radius);
+  gap: 12px;
+  border: 2px dashed var(--md-sys-color-outline-variant);
+  border-radius: var(--md-shape-corner-extra-large);
   cursor: pointer;
-  transition: all var(--transition);
-  padding: 48px 24px;
+  transition: all var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
+  padding: 48px 32px;
   text-align: center;
-  min-height: 340px;
+  min-height: 360px;
+  background: var(--md-sys-color-surface-container-lowest);
 }
 
 .upload-zone:hover,
 .upload-zone.dragging {
-  border-color: var(--color-accent);
-  background: rgba(112, 146, 255, 0.05);
+  border-color: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 5%, var(--md-sys-color-surface));
 }
 
 .upload-zone.dragging {
-  background: rgba(112, 146, 255, 0.1);
-  transform: scale(1.01);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 10%, var(--md-sys-color-surface));
+  transform: scale(1.005);
 }
 
-.upload-icon {
+/* Container icon - Material tonal style */
+.upload-icon-container {
+  width: 80px;
+  height: 80px;
+  background: var(--md-sys-color-secondary-container);
+  border-radius: var(--md-shape-corner-extra-large);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 8px;
-  transition: transform var(--transition);
+  transition: all var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
 }
 
-.upload-zone:hover .upload-icon,
-.upload-zone.dragging .upload-icon {
+.upload-icon-container .material-icons-round {
+  font-size: 36px;
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.upload-zone:hover .upload-icon-container,
+.upload-zone.dragging .upload-icon-container {
+  background: var(--md-sys-color-primary-container);
   transform: translateY(-4px);
 }
 
+.upload-zone:hover .upload-icon-container .material-icons-round,
+.upload-zone.dragging .upload-icon-container .material-icons-round {
+  color: var(--md-sys-color-on-primary-container);
+}
+
 .upload-title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--color-text);
+  font-size: var(--md-typescale-title-medium);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  letter-spacing: 0.15px;
 }
 
 .upload-sub {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+  font-size: var(--md-typescale-body-medium);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .upload-link {
-  color: var(--color-accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--md-sys-color-primary);
+  font-weight: 500;
 }
 
 .upload-hint {
-  font-size: 0.78rem;
-  color: var(--color-text-muted);
-  margin-top: 4px;
+  font-size: var(--md-typescale-body-small);
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 0.7;
+}
+
+/* Divider line */
+.upload-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 200px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-typescale-label-medium);
+}
+
+.upload-divider::before,
+.upload-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--md-sys-color-outline-variant);
+}
+
+/* M3 Filled Tonal Button */
+.md-btn-tonal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: var(--md-typescale-label-large);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  border: none;
+  border-radius: var(--md-shape-corner-full);
+  cursor: pointer;
+  transition: all var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.md-btn-tonal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--md-sys-color-on-secondary-container);
+  opacity: 0;
+  transition: opacity var(--md-motion-duration-medium1);
+}
+
+.md-btn-tonal:hover::after {
+  opacity: 0.08;
+}
+
+.md-btn-tonal .material-icons-round {
+  font-size: 18px;
 }

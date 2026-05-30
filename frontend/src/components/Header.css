@@ -1,58 +1,97 @@
+/* === M3 Top App Bar === */
 .header {
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid var(--color-border);
-  background: rgba(26, 26, 46, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--md-sys-color-surface);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
-  height: 60px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+/* Logo */
 .logo-mark {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
+  cursor: default;
+}
+
+.logo-icon-wrap {
+  width: 40px;
+  height: 40px;
+  background: var(--md-sys-color-primary-container);
+  border-radius: var(--md-shape-corner-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon-wrap .material-icons-round {
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 22px;
 }
 
 .logo-text {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-text);
-  letter-spacing: -0.01em;
+  font-size: var(--md-typescale-title-large);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  letter-spacing: 0;
 }
 
-.logo-accent {
-  color: var(--color-accent);
-}
-
+/* Nav */
 .nav {
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.nav-link {
-  padding: 6px 14px;
-  font-size: 0.88rem;
-  color: var(--color-text-muted);
-  text-decoration: none;
-  border-radius: 8px;
-  transition: all var(--transition);
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: var(--md-typescale-label-large);
   font-weight: 500;
+  letter-spacing: 0.1px;
+  color: var(--md-sys-color-on-surface-variant);
+  background: transparent;
+  border: none;
+  border-radius: var(--md-shape-corner-full);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
+  position: relative;
+  overflow: hidden;
 }
 
-.nav-link:hover {
-  color: var(--color-text);
-  background: var(--color-surface-hover);
+.nav-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--md-sys-color-on-surface);
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity var(--md-motion-duration-medium1);
+}
+
+.nav-btn:hover::after {
+  opacity: 0.08;
+}
+
+.nav-btn:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.nav-btn .material-icons-round {
+  font-size: 18px;
 }

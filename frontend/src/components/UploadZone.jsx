@@ -12,7 +12,7 @@ export default function UploadZone({ onFileSelect }) {
       return
     }
     if (file.size > 20 * 1024 * 1024) {
-      alert('File too large. Max 20MB.')
+      alert('File too large. Maximum size is 20MB.')
       return
     }
     onFileSelect(file)
@@ -21,8 +21,7 @@ export default function UploadZone({ onFileSelect }) {
   const handleDrop = useCallback((e) => {
     e.preventDefault()
     setDragging(false)
-    const file = e.dataTransfer.files?.[0]
-    handleFile(file)
+    handleFile(e.dataTransfer.files?.[0])
   }, [handleFile])
 
   const handleDragOver = useCallback((e) => {
@@ -30,13 +29,10 @@ export default function UploadZone({ onFileSelect }) {
     setDragging(true)
   }, [])
 
-  const handleDragLeave = useCallback(() => {
-    setDragging(false)
-  }, [])
+  const handleDragLeave = useCallback(() => setDragging(false), [])
 
   const handleInputChange = useCallback((e) => {
-    const file = e.target.files?.[0]
-    handleFile(file)
+    handleFile(e.target.files?.[0])
   }, [handleFile])
 
   return (
@@ -54,22 +50,21 @@ export default function UploadZone({ onFileSelect }) {
         style={{ display: 'none' }}
         onChange={handleInputChange}
       />
-      <div className="upload-icon">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <defs>
-            <linearGradient id="upl" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#7092ff" />
-              <stop offset="100%" stopColor="#a78bfa" />
-            </linearGradient>
-          </defs>
-          <rect width="48" height="48" rx="14" fill="url(#upl)" opacity="0.12" />
-          <path d="M24 16v16M16 24l8-8 8 8" stroke="url(#upl)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M14 34h20" stroke="url(#upl)" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
-        </svg>
+
+      <div className="upload-icon-container">
+        <span className="material-icons-round">cloud_upload</span>
       </div>
+
       <p className="upload-title">Drop your image here</p>
-      <p className="upload-sub">or <span className="upload-link">browse files</span></p>
-      <p className="upload-hint">PNG, JPG, WebP up to 20MB</p>
+
+      <div className="upload-divider">or</div>
+
+      <button className="md-btn-tonal" onClick={(e) => { e.stopPropagation(); document.getElementById('file-input').click() }}>
+        <span className="material-icons-round">folder_open</span>
+        Browse files
+      </button>
+
+      <p className="upload-hint">PNG, JPG, WebP · Up to 20 MB</p>
     </div>
   )
 }
