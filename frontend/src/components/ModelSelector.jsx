@@ -20,6 +20,8 @@ export default function ModelSelector({ models, selected, onSelect }) {
           key={model.id}
           className={`model-option md-ripple ${selected === model.id ? 'selected' : ''}`}
           onClick={() => onSelect(model.id)}
+          disabled={model.enabled === false}
+          title={model.disabledReason || model.description}
         >
           <div className="model-option-inner">
             <div className="model-option-icon">
@@ -27,7 +29,7 @@ export default function ModelSelector({ models, selected, onSelect }) {
             </div>
             <div className="model-option-text">
               <span className="model-option-name">{model.name}</span>
-              <span className="model-option-sub">{model.description}</span>
+              <span className="model-option-sub">{model.enabled === false ? model.disabledReason : model.description}</span>
             </div>
             <span className={`model-option-badge model-option-badge--${BADGE_CLASS[model.id]}`}>
               {model.badge}

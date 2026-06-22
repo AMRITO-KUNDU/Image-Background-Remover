@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Header from './components/Header'
 import ModelSelector from './components/ModelSelector'
 import UploadZone from './components/UploadZone'
@@ -34,6 +34,7 @@ const MODEL_STATS = {
 }
 
 export default function App() {
+  const [models, setModels] = useState(MODELS)
   const [selectedModel, setSelectedModel] = useState('u2net')
   const [alphaMatting, setAlphaMatting] = useState(false)
   const [originalFile, setOriginalFile] = useState(null)
@@ -42,6 +43,37 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    fetch('/api/models')
+      .then((res) => res.json())
+      .then((data) => {
+        const apiModels = Object.entries(data.models || {}).map(([id, model]) => ({
+          id,
+          name: model.name,
+          badge: id === 'u2net' ? 'Free tier' : model.speed,
+          description: model.description,
+          enabled: model.enabled !== false,
+          disabledReason: model.disabled_reason,
+        }))
+        if (apiModels.length) {
+          setModels(apiModels)
+        }
+      })
+      .catch(() => {
+        // Keep bundled model metadata when the API is unavailable during local frontend-only dev.
+      })
+  }, [])
+
+  const handleModelSelect = useCallback((modelId) => {
+    const nextModel = models.find((model) => model.id === modelId)
+    if (nextModel?.enabled === false) {
+      setError(nextModel.disabledReason || 'This model is disabled on the current deployment.')
+      return
+    }
+    setSelectedModel(modelId)
+    setError(null)
+  }, [models])
 
   const handleFileSelect = useCallback((file) => {
     setOriginalFile(file)
@@ -91,7 +123,7 @@ export default function App() {
     setProgress(0)
   }, [])
 
-  const currentModel = MODELS.find(m => m.id === selectedModel)
+  const currentModel = models.find(m => m.id === selectedModel)
 
   return (
     <div className="app">
@@ -108,7 +140,7 @@ export default function App() {
             Remove backgrounds<br /><strong>in seconds</strong>
           </h1>
           <p className="hero-body">
-            Three state-of-the-art models. Upload an image, choose your model, and download a perfect transparent PNG — no signup required.
+            Docker-ready for Render. On Render free tier, U2-Net is recommended because larger models can exceed free RAM/CPU limits.
           </p>
         </div>
 
@@ -119,7 +151,7 @@ export default function App() {
           <aside className="md-card controls-panel">
             <div className="panel-section">
               <p className="section-label">AI Model</p>
-              <ModelSelector models={MODELS} selected={selectedModel} onSelect={setSelectedModel} />
+              <ModelSelector models={models} selected={selectedModel} onSelect={handleModelSelect} />
             </div>
 
             <div className="panel-divider" />
@@ -201,7 +233,7 @@ export default function App() {
           </div>
 
           <div className="models-grid">
-            {MODELS.map(m => {
+            {models.map(m => {
               const stats = MODEL_STATS[m.id]
               const chipClass = m.id === 'u2net' ? 'fast' : m.id === 'isnet-general-use' ? 'balanced' : 'best'
               return (
