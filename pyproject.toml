@@ -8,6 +8,6 @@ dependencies = [
     "fastapi>=0.136.3",
     "pillow>=12.2.0",
     "python-multipart>=0.0.29",
-    "rembg[gpu]>=2.0.75",
+    "rembg>=2.0.75",
     "uvicorn[standard]>=0.48.0",
 ]

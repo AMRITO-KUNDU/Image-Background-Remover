@@ -1,6 +1,6 @@
 fastapi==0.115.5
 uvicorn[standard]==0.32.1
 python-multipart==0.0.12
-rembg[gpu]==2.0.59
+rembg==2.0.59
 pillow==10.4.0
 aiofiles==24.1.0

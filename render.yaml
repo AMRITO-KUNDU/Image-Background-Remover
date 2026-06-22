@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: image-background-remover
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: RENDER_FREE_TIER
+        value: "true"
+      - key: MAX_UPLOAD_MB
+        value: "8"
+      - key: ENABLE_HEAVY_MODELS
+        value: "false"
+      - key: MODEL_CACHE_DIR
+        value: /tmp/rembg-models

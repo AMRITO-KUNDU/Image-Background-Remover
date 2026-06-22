@@ -117,3 +117,13 @@
   background: var(--md-sys-color-secondary);
   color: var(--md-sys-color-on-secondary);
 }
+
+.model-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.model-option:disabled .model-option-badge {
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
+}
