@@ -127,3 +127,52 @@
   background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface-variant);
 }
+
+.model-option-badge--api {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.model-option-badge--very-fast {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.model-option-badge--portrait {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.model-option-badge--realtime {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.model-option-badge--default {
+  background: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+.model-option-badge--marketplace {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  padding: 4px 8px;
+}
+
+.marketplace-option {
+  border: 2px dashed var(--md-sys-color-outline);
+  margin-top: 8px;
+}
+
+.marketplace-option:hover .model-option-inner {
+  background: var(--md-sys-color-primary-container);
+}
+
+.marketplace-option:hover .model-option-name {
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.marketplace-option:hover .model-option-sub {
+  color: var(--md-sys-color-on-primary-container);
+  opacity: 0.8;
+}

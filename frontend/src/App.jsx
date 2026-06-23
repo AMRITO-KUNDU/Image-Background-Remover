@@ -4,9 +4,16 @@ import ModelSelector from './components/ModelSelector'
 import UploadZone from './components/UploadZone'
 import ResultPanel from './components/ResultPanel'
 import Footer from './components/Footer'
+import Marketplace from './components/Marketplace'
 import './App.css'
 
 const MODELS = [
+  {
+    id: 'remove.bg',
+    name: 'remove.bg API',
+    badge: 'API',
+    description: 'Cloud-based API service with excellent quality',
+  },
   {
     id: 'u2net',
     name: 'U2-Net',
@@ -28,14 +35,29 @@ const MODELS = [
 ]
 
 const MODEL_STATS = {
+  'remove.bg':        { speed: 95,  accuracy: 100 },
   'u2net':             { speed: 100, accuracy: 60 },
   'isnet-general-use': { speed: 80,  accuracy: 80 },
   'birefnet-general':  { speed: 55,  accuracy: 100 },
 }
 
+function AlphaMattingToggle({ value, onChange }) {
+  return (
+    <button
+      className={`alpha-toggle ${value ? 'active' : ''}`}
+      onClick={() => onChange(!value)}
+    >
+      <div className="alpha-toggle-track">
+        <div className="alpha-toggle-thumb" />
+      </div>
+      <span className="alpha-toggle-label">Alpha matting</span>
+    </button>
+  )
+}
+
 export default function App() {
   const [models, setModels] = useState(MODELS)
-  const [selectedModel, setSelectedModel] = useState('u2net')
+  const [selectedModel, setSelectedModel] = useState('remove.bg')
   const [alphaMatting, setAlphaMatting] = useState(false)
   const [originalFile, setOriginalFile] = useState(null)
   const [originalUrl, setOriginalUrl] = useState(null)
@@ -43,6 +65,7 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [progress, setProgress] = useState(0)
+  const [showMarketplace, setShowMarketplace] = useState(false)
 
   useEffect(() => {
     fetch('/api/models')
@@ -51,7 +74,36 @@ export default function App() {
         const apiModels = Object.entries(data.models || {}).map(([id, model]) => ({
           id,
           name: model.name,
-          badge: id === 'u2net' ? 'Free tier' : model.speed,
+          badge: model.type === 'api' ? 'API' : model.speed,
+          description: model.description,
+          enabled: model.enabled !== false,
+          disabledReason: model.disabled_reason,
+        }))
+        if (apiModels.length) {
+          setModels(apiModels)
+          // Set default to remove.bg if available, otherwise first available model
+          const removeBgModel = apiModels.find(m => m.id === 'remove.bg')
+          if (removeBgModel && removeBgModel.enabled) {
+            setSelectedModel('remove.bg')
+          } else {
+            const firstEnabled = apiModels.find(m => m.enabled !== false)
+            if (firstEnabled) setSelectedModel(firstEnabled.id)
+          }
+        }
+      })
+      .catch(() => {
+        // Keep bundled model metadata when the API is unavailable during local frontend-only dev.
+      })
+  }, [])
+
+  const refreshModels = useCallback(() => {
+    fetch('/api/models')
+      .then((res) => res.json())
+      .then((data) => {
+        const apiModels = Object.entries(data.models || {}).map(([id, model]) => ({
+          id,
+          name: model.name,
+          badge: model.type === 'api' ? 'API' : model.speed,
           description: model.description,
           enabled: model.enabled !== false,
           disabledReason: model.disabled_reason,
@@ -60,9 +112,7 @@ export default function App() {
           setModels(apiModels)
         }
       })
-      .catch(() => {
-        // Keep bundled model metadata when the API is unavailable during local frontend-only dev.
-      })
+      .catch(() => {})
   }, [])
 
   const handleModelSelect = useCallback((modelId) => {
@@ -140,7 +190,7 @@ export default function App() {
             Remove backgrounds<br /><strong>in seconds</strong>
           </h1>
           <p className="hero-body">
-            Docker-ready for Render. On Render free tier, U2-Net is recommended because larger models can exceed free RAM/CPU limits.
+            Default: remove.bg API for excellent quality. Browse the marketplace for more local models.
           </p>
         </div>
 
@@ -151,7 +201,12 @@ export default function App() {
           <aside className="md-card controls-panel">
             <div className="panel-section">
               <p className="section-label">AI Model</p>
-              <ModelSelector models={models} selected={selectedModel} onSelect={handleModelSelect} />
+              <ModelSelector 
+                models={models} 
+                selected={selectedModel} 
+                onSelect={handleModelSelect}
+                onOpenMarketplace={() => setShowMarketplace(true)}
+              />
             </div>
 
             <div className="panel-divider" />
@@ -233,30 +288,29 @@ export default function App() {
           </div>
 
           <div className="models-grid">
-            {models.map(m => {
+            {models.filter(m => m.enabled !== false).map(m => {
               const stats = MODEL_STATS[m.id]
-              const chipClass = m.id === 'u2net' ? 'fast' : m.id === 'isnet-general-use' ? 'balanced' : 'best'
+              if (!stats) return null
+              const chipClass = m.id === 'remove.bg' ? 'api' : m.id === 'u2net' ? 'fast' : m.id === 'isnet-general-use' ? 'balanced' : 'best'
               return (
                 <div key={m.id} className="model-info-card">
                   <div className="model-info-header">
                     <span className="model-info-name">{m.name}</span>
                     <span className={`model-chip model-chip--${chipClass}`}>{m.badge}</span>
                   </div>
-                  <p className="model-info-desc">{m.description}</p>
-                  <div className="model-stats">
-                    <div className="model-stat-row">
-                      <span className="model-stat-label">Speed</span>
-                      <div className="model-stat-bar-wrap">
-                        <div className="model-stat-bar" style={{ width: `${stats.speed}%` }} />
+                  <p className="model-info-description">{m.description}</p>
+                  <div className="model-info-stats">
+                    <div className="stat-bar">
+                      <span className="stat-label">Speed</span>
+                      <div className="stat-track">
+                        <div className="stat-fill" style={{ width: `${stats.speed}%` }} />
                       </div>
-                      <span className="model-stat-value">{stats.speed}%</span>
                     </div>
-                    <div className="model-stat-row">
-                      <span className="model-stat-label">Accuracy</span>
-                      <div className="model-stat-bar-wrap">
-                        <div className="model-stat-bar" style={{ width: `${stats.accuracy}%`, background: 'var(--md-sys-color-tertiary)' }} />
+                    <div className="stat-bar">
+                      <span className="stat-label">Accuracy</span>
+                      <div className="stat-track">
+                        <div className="stat-fill" style={{ width: `${stats.accuracy}%` }} />
                       </div>
-                      <span className="model-stat-value">{stats.accuracy}%</span>
                     </div>
                   </div>
                 </div>
@@ -267,73 +321,14 @@ export default function App() {
       </main>
 
       <Footer />
-    </div>
-  )
-}
 
-function AlphaMattingToggle({ value, onChange }) {
-  return (
-    <button
-      onClick={() => onChange(v => !v)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        width: '100%',
-        padding: '14px 16px',
-        border: `1px solid ${value ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}`,
-        borderRadius: 'var(--md-shape-corner-medium)',
-        background: value ? 'var(--md-sys-color-primary-container)' : 'transparent',
-        cursor: 'pointer',
-        textAlign: 'left',
-        transition: 'all 200ms cubic-bezier(0.2,0,0,1)',
-      }}
-    >
-      {/* M3-style switch */}
-      <div style={{
-        width: 52,
-        height: 32,
-        borderRadius: 'var(--md-shape-corner-full)',
-        background: value ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-surface-container-highest)',
-        border: value ? 'none' : '2px solid var(--md-sys-color-outline)',
-        position: 'relative',
-        flexShrink: 0,
-        transition: 'all 200ms',
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: value ? 4 : 6,
-          left: value ? 24 : 6,
-          width: value ? 24 : 16,
-          height: value ? 24 : 16,
-          borderRadius: '50%',
-          background: value ? 'var(--md-sys-color-on-primary)' : 'var(--md-sys-color-outline)',
-          transition: 'all 200ms cubic-bezier(0.2,0,0,1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          {value && (
-            <span className="material-icons-round" style={{ fontSize: 14, color: 'var(--md-sys-color-primary)' }}>check</span>
-          )}
-        </div>
-      </div>
-      <div style={{ flex: 1 }}>
-        <p style={{
-          fontSize: 'var(--md-typescale-body-medium)',
-          fontWeight: 500,
-          color: value ? 'var(--md-sys-color-on-primary-container)' : 'var(--md-sys-color-on-surface)',
-          marginBottom: 2,
-        }}>
-          Alpha Matting
-        </p>
-        <p style={{
-          fontSize: 'var(--md-typescale-body-small)',
-          color: value ? 'var(--md-sys-color-on-primary-container)' : 'var(--md-sys-color-on-surface-variant)',
-        }}>
-          Refines hair and fur edges
-        </p>
-      </div>
-    </button>
+      {/* Marketplace Modal */}
+      {showMarketplace && (
+        <Marketplace 
+          onClose={() => setShowMarketplace(false)}
+          onModelDownloaded={refreshModels}
+        />
+      )}
+    </div>
   )
 }

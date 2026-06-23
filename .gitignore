@@ -15,6 +15,7 @@ env/
 
 # rembg model cache
 .u2net/
+models/
 
 # Node
 node_modules/
