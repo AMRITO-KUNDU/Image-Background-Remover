@@ -1,178 +1,239 @@
-/* === M3 Navigation-style Model Selector === */
-.model-selector {
+.model-selector-grid {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
 }
 
-.model-option {
+.model-card-btn {
   display: flex;
-  align-items: center;
-  gap: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  border-radius: var(--md-shape-corner-full);
+  flex-direction: column;
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
   text-align: left;
-  width: 100%;
-  transition: background var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
   position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
-.model-option-inner {
+.model-card-btn:hover:not(:disabled) {
+  background: var(--bg-surface-hover);
+  border-color: var(--color-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.model-card-btn.selected {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 12px var(--color-primary-glow);
+}
+
+.model-card-top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  margin-bottom: 12px;
   width: 100%;
-  padding: 12px 16px;
-  border-radius: var(--md-shape-corner-full);
 }
 
-.model-option.selected .model-option-inner {
-  background: var(--md-sys-color-secondary-container);
-}
-
-.model-option:not(.selected):hover .model-option-inner {
-  background: rgba(73, 69, 79, 0.08);
-}
-
-.model-option-icon {
-  width: 24px;
-  height: 24px;
+.model-card-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.model-option-icon .material-icons-round {
-  font-size: 20px;
-  color: var(--md-sys-color-on-surface-variant);
-  transition: color var(--md-motion-duration-medium1);
+.model-card-icon .material-icons-round {
+  font-size: 18px;
+  color: var(--color-text-secondary);
 }
 
-.model-option.selected .material-icons-round {
-  color: var(--md-sys-color-on-secondary-container);
+.model-card-btn.selected .model-card-icon {
+  background: var(--color-secondary-container);
+  border-color: transparent;
 }
 
-.model-option-text {
+.model-card-btn.selected .model-card-icon .material-icons-round {
+  color: var(--color-primary);
+}
+
+.model-card-text {
   flex: 1;
   min-width: 0;
+  padding-right: 48px; /* space for badge */
 }
 
-.model-option-name {
+.model-card-name {
   display: block;
-  font-size: var(--md-typescale-label-large);
-  font-weight: 500;
-  letter-spacing: 0.1px;
-  color: var(--md-sys-color-on-surface);
-  transition: color var(--md-motion-duration-medium1);
-}
-
-.model-option.selected .model-option-name {
-  color: var(--md-sys-color-on-secondary-container);
+  font-family: var(--font-display);
+  font-size: 14px;
   font-weight: 700;
+  color: var(--color-text-primary);
 }
 
-.model-option-sub {
+.model-card-desc {
   display: block;
-  font-size: var(--md-typescale-label-medium);
-  color: var(--md-sys-color-on-surface-variant);
-  letter-spacing: 0.25px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
   margin-top: 2px;
 }
 
-.model-option.selected .model-option-sub {
-  color: var(--md-sys-color-on-secondary-container);
-  opacity: 0.8;
+/* Badge tags */
+.model-card-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.5px;
 }
 
-.model-option-badge {
-  font-size: var(--md-typescale-label-small);
+.badge-api {
+  background: rgba(6, 182, 212, 0.1);
+  color: #22d3ee;
+}
+.badge-fast {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+}
+.badge-balanced {
+  background: rgba(99, 102, 241, 0.1);
+  color: #818cf8;
+}
+.badge-best {
+  background: rgba(244, 63, 94, 0.1);
+  color: #fb7185;
+}
+.badge-very-fast {
+  background: rgba(16, 185, 129, 0.1);
+  color: #34d399;
+}
+.badge-portrait {
+  background: rgba(244, 63, 94, 0.1);
+  color: #fb7185;
+}
+.badge-realtime {
+  background: rgba(249, 115, 22, 0.1);
+  color: #fdba74;
+}
+.badge-default {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-secondary);
+}
+
+/* Mini metrics */
+.model-card-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.metric-mini-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metric-label {
+  font-size: 10px;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: var(--md-shape-corner-full);
-  letter-spacing: 0.2px;
-  flex-shrink: 0;
+  color: var(--color-text-muted);
+  width: 24px;
 }
 
-.model-option-badge--fast {
-  background: #E6F4EA;
-  color: #137333;
+.metric-bar-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-full);
+  overflow: hidden;
 }
 
-.model-option-badge--balanced {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
+.metric-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
 }
 
-.model-option-badge--best {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+.metric-bar-fill.fill-speed {
+  background-color: var(--color-primary);
 }
 
-.model-option.selected .model-option-badge--balanced {
-  background: var(--md-sys-color-secondary);
-  color: var(--md-sys-color-on-secondary);
+.metric-bar-fill.fill-acc {
+  background-color: var(--color-secondary, #6366f1);
 }
 
-.model-option:disabled {
+/* Disabled model state */
+.model-card-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-  opacity: 0.55;
 }
 
-.model-option:disabled .model-option-badge {
-  background: var(--md-sys-color-surface-container-highest);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.model-option-badge--api {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-
-.model-option-badge--very-fast {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.model-option-badge--portrait {
-  background: #fce4ec;
-  color: #c2185b;
-}
-
-.model-option-badge--realtime {
-  background: #fff3e0;
-  color: #e65100;
-}
-
-.model-option-badge--default {
-  background: var(--md-sys-color-tertiary-container);
-  color: var(--md-sys-color-on-tertiary-container);
-}
-
-.model-option-badge--marketplace {
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+.model-disabled-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.05);
   padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  width: 100%;
 }
 
-.marketplace-option {
-  border: 2px dashed var(--md-sys-color-outline);
-  margin-top: 8px;
+.model-disabled-label .material-icons-round {
+  font-size: 14px;
 }
 
-.marketplace-option:hover .model-option-inner {
-  background: var(--md-sys-color-primary-container);
+/* Marketplace Button card styling */
+.marketplace-card-btn {
+  border: 1px dashed var(--color-primary);
+  background: rgba(6, 182, 212, 0.02);
 }
 
-.marketplace-option:hover .model-option-name {
-  color: var(--md-sys-color-on-primary-container);
+.marketplace-card-btn:hover {
+  background: rgba(6, 182, 212, 0.05);
+  border-color: var(--color-primary);
+  border-style: solid;
 }
 
-.marketplace-option:hover .model-option-sub {
-  color: var(--md-sys-color-on-primary-container);
-  opacity: 0.8;
+.marketplace-icon {
+  border-color: rgba(6, 182, 212, 0.2);
+}
+
+.marketplace-icon .material-icons-round {
+  color: var(--color-primary);
+}
+
+.marketplace-btn-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(6, 182, 212, 0.2);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.marketplace-btn-hint .material-icons-round {
+  font-size: 14px;
 }

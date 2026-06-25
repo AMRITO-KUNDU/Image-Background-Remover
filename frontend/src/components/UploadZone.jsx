@@ -51,20 +51,33 @@ export default function UploadZone({ onFileSelect }) {
         onChange={handleInputChange}
       />
 
-      <div className="upload-icon-container">
-        <span className="material-icons-round">cloud_upload</span>
+      <div className="upload-glow-border" />
+
+      <div className="upload-content">
+        <div className="upload-icon-container">
+          <span className="material-icons-round">cloud_upload</span>
+        </div>
+
+        <div className="upload-text-group">
+          <h3 className="upload-title">Drag & drop your image here</h3>
+          <p className="upload-sub">or click to browse local files</p>
+        </div>
+
+        <div className="upload-divider">
+          <span>OR</span>
+        </div>
+
+        <button 
+          className="glow-btn" 
+          onClick={(e) => { e.stopPropagation(); document.getElementById('file-input').click() }}
+          type="button"
+        >
+          <span className="material-icons-round">folder_open</span>
+          Browse Files
+        </button>
+
+        <p className="upload-hint">Supports PNG, JPG, WebP, GIF up to 20 MB</p>
       </div>
-
-      <p className="upload-title">Drop your image here</p>
-
-      <div className="upload-divider">or</div>
-
-      <button className="md-btn-tonal" onClick={(e) => { e.stopPropagation(); document.getElementById('file-input').click() }}>
-        <span className="material-icons-round">folder_open</span>
-        Browse files
-      </button>
-
-      <p className="upload-hint">PNG, JPG, WebP · Up to 20 MB</p>
     </div>
   )
 }

@@ -1,240 +1,275 @@
-/* === M3 Result Panel === */
 .result-panel {
   flex: 1;
-  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
-  background: var(--md-sys-color-surface-container-lowest);
-  border-radius: var(--md-shape-corner-extra-large);
+  gap: 20px;
+  padding: 24px;
+  width: 100%;
 }
 
-/* === M3 Segmented Button (Tab bar) === */
-.md-segmented-btn {
-  display: flex;
-  border: 1px solid var(--md-sys-color-outline);
-  border-radius: var(--md-shape-corner-full);
-  overflow: hidden;
-  align-self: flex-start;
-}
-
-.seg-btn {
+.panel-header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  font-size: var(--md-typescale-label-large);
-  font-weight: 500;
-  letter-spacing: 0.1px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  z-index: 2;
+}
+
+/* === Segmented Tabs === */
+.tab-segmented-control {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
   border: none;
-  border-left: 1px solid var(--md-sys-color-outline);
   background: transparent;
-  color: var(--md-sys-color-on-surface);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
-  position: relative;
-  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
-.seg-btn:first-child {
-  border-left: none;
+.tab-btn:hover {
+  color: var(--color-text-primary);
 }
 
-.seg-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: currentColor;
-  opacity: 0;
-  transition: opacity var(--md-motion-duration-medium1);
+.tab-btn.active {
+  background: var(--gradient-accent);
+  color: #000000;
+  box-shadow: 0 2px 8px var(--color-primary-glow);
 }
 
-.seg-btn:hover::after {
-  opacity: 0.08;
+.theme-minimal-dark .tab-btn.active {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: none;
 }
 
-.seg-btn.active {
-  background: var(--md-sys-color-secondary-container);
-  color: var(--md-sys-color-on-secondary-container);
-}
-
-.seg-btn .material-icons-round {
+.tab-btn .material-icons-round {
   font-size: 16px;
 }
 
-/* === Image Containers === */
-.result-images {
+/* === Image Viewport === */
+.result-viewport {
   flex: 1;
-  min-height: 280px;
-  display: flex;
-}
-
-.split-view {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.single-view {
-  flex: 1;
+  min-height: 380px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.image-column {
+.viewport-state-overlay {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 16px;
+  color: var(--color-text-secondary);
 }
 
-.image-column-label {
-  font-size: var(--md-typescale-label-medium);
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--md-sys-color-on-surface-variant);
+.spinner-loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.05);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.state-text {
+  font-size: 14px;
+}
+
+.image-view-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.single-viewport-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .preview-img {
-  width: 100%;
-  max-height: 340px;
+  max-width: 100%;
+  max-height: 360px;
   object-fit: contain;
-  border-radius: var(--md-shape-corner-large);
-  background: var(--md-sys-color-surface-container);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.4s ease, background 0.4s ease;
 }
 
-/* Checkerboard for transparency */
-.checkerboard {
-  background-image:
-    linear-gradient(45deg, #E7E0EC 25%, transparent 25%),
-    linear-gradient(-45deg, #E7E0EC 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #E7E0EC 75%),
-    linear-gradient(-45deg, transparent 75%, #E7E0EC 75%);
-  background-size: 16px 16px;
-  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-  background-color: #F3EDF7;
-}
-
-/* States */
-.state-placeholder {
-  flex: 1;
+/* === Before/After Comparison Slider === */
+.slider-wrapper {
+  position: relative;
   width: 100%;
-  min-height: 200px;
+  max-width: 550px;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  user-select: none;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.slider-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.slider-fg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  transition: background-color 0.4s ease, background 0.4s ease;
+}
+
+/* Slider Line Handle */
+.slider-divider-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ffffff;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.slider-handle-node {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 38px;
+  height: 38px;
+  background: #ffffff;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  border-radius: var(--md-shape-corner-large);
-  background: var(--md-sys-color-surface-container-low);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  color: #000000;
 }
 
-.state-placeholder .material-icons-round {
-  font-size: 40px;
-  color: var(--md-sys-color-outline);
+.slider-handle-node .material-icons-round {
+  font-size: 20px;
+  transform: rotate(90deg);
 }
 
-.state-placeholder p {
-  font-size: var(--md-typescale-body-medium);
-  color: var(--md-sys-color-on-surface-variant);
-  text-align: center;
-  max-width: 200px;
-  line-height: 1.5;
+/* Range input overlay */
+.slider-range-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: ew-resize;
+  z-index: 5;
+  margin: 0;
 }
 
-/* M3 Circular Progress */
-.md-circular-progress {
-  width: 48px;
-  height: 48px;
-  border: 4px solid var(--md-sys-color-surface-container-highest);
-  border-top-color: var(--md-sys-color-primary);
-  border-radius: 50%;
-  animation: md-spin 0.8s linear infinite;
-}
-
-@keyframes md-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* === Action Buttons === */
-.result-actions {
+/* === Footer Controls === */
+.viewport-footer {
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Background Changer Preset Dots */
+.bg-changer-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bg-changer-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-text-muted);
+}
+
+.bg-presets-list {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
-/* M3 Text Button */
-.md-btn-text {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  font-size: var(--md-typescale-label-large);
-  font-weight: 500;
-  letter-spacing: 0.1px;
-  color: var(--md-sys-color-primary);
-  background: transparent;
-  border: none;
-  border-radius: var(--md-shape-corner-full);
+.bg-preset-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: all var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
+  border: 2px solid var(--color-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, border-color 0.2s ease;
   position: relative;
   overflow: hidden;
+  padding: 0;
 }
 
-.md-btn-text::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--md-sys-color-primary);
-  opacity: 0;
-  transition: opacity var(--md-motion-duration-medium1);
+.bg-preset-dot:hover {
+  transform: scale(1.15);
+  border-color: var(--color-text-secondary);
 }
 
-.md-btn-text:hover::after { opacity: 0.08; }
-
-.md-btn-text .material-icons-round {
-  font-size: 18px;
+.bg-preset-dot.active {
+  transform: scale(1.15);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-primary-glow);
 }
 
-/* M3 Filled Button */
-.md-btn-filled {
-  display: inline-flex;
+/* Action controls */
+.action-row {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  font-size: var(--md-typescale-label-large);
-  font-weight: 500;
-  letter-spacing: 0.1px;
-  color: var(--md-sys-color-on-primary);
-  background: var(--md-sys-color-primary);
-  border: none;
-  border-radius: var(--md-shape-corner-full);
-  cursor: pointer;
-  transition: all var(--md-motion-duration-medium1) var(--md-motion-easing-standard);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+  justify-content: flex-end;
+  gap: 12px;
 }
 
-.md-btn-filled::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--md-sys-color-on-primary);
-  opacity: 0;
-  transition: opacity var(--md-motion-duration-medium1);
-}
-
-.md-btn-filled:hover::after { opacity: 0.08; }
-.md-btn-filled:hover {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 8px 3px rgba(0,0,0,0.15);
-}
-
-.md-btn-filled .material-icons-round {
-  font-size: 18px;
+@media (max-width: 576px) {
+  .action-row {
+    flex-direction: column;
+  }
+  .action-row button {
+    width: 100%;
+    justify-content: center;
+  }
 }

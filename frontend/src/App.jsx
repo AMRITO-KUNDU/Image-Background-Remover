@@ -46,11 +46,15 @@ function AlphaMattingToggle({ value, onChange }) {
     <button
       className={`alpha-toggle ${value ? 'active' : ''}`}
       onClick={() => onChange(!value)}
+      type="button"
     >
       <div className="alpha-toggle-track">
         <div className="alpha-toggle-thumb" />
       </div>
-      <span className="alpha-toggle-label">Alpha matting</span>
+      <div className="alpha-toggle-info">
+        <span className="alpha-toggle-label">Alpha Matting</span>
+        <span className="alpha-toggle-sublabel">Recovers fine details like hair/fur edges</span>
+      </div>
     </button>
   )
 }
@@ -66,6 +70,37 @@ export default function App() {
   const [error, setError] = useState(null)
   const [progress, setProgress] = useState(0)
   const [showMarketplace, setShowMarketplace] = useState(false)
+
+  // Brand and Theme Customization States
+  const [theme, setTheme] = useState(() => localStorage.getItem('luminabg-theme') || 'dark-lumina')
+  const [borderRadius, setBorderRadius] = useState(() => localStorage.getItem('luminabg-radius') || 'rounded-large')
+
+  // Sync theme and border radius preferences
+  useEffect(() => {
+    const rootClasses = document.documentElement.classList
+    
+    // Clean up existing theme/radius classes
+    rootClasses.forEach((cls) => {
+      if (cls.startsWith('theme-') || cls.startsWith('radius-')) {
+        rootClasses.remove(cls)
+      }
+    })
+
+    // Apply new preferences
+    rootClasses.add(`theme-${theme}`)
+
+    const radiusMap = {
+      'rounded-none': 'radius-none',
+      'rounded-medium': 'radius-medium',
+      'rounded-large': 'radius-large',
+      'rounded-full': 'radius-full',
+    }
+    rootClasses.add(radiusMap[borderRadius] || 'radius-large')
+
+    // Persist to local storage
+    localStorage.setItem('luminabg-theme', theme)
+    localStorage.setItem('luminabg-radius', borderRadius)
+  }, [theme, borderRadius])
 
   useEffect(() => {
     fetch('/api/models')
@@ -177,30 +212,39 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header />
+      {/* Decorative Blur Blobs */}
+      <div className="glow-blob glow-blob-1"></div>
+      <div className="glow-blob glow-blob-2"></div>
+
+      <Header 
+        theme={theme} 
+        setTheme={setTheme}
+        borderRadius={borderRadius}
+        setBorderRadius={setBorderRadius}
+      />
 
       <main className="main">
-        {/* Hero */}
-        <div className="hero">
+        {/* Premium Landing Hero */}
+        <header className="hero">
           <div className="hero-eyebrow">
-            <span className="material-icons-round" style={{ fontSize: 16 }}>auto_awesome</span>
+            <span className="material-icons-round">auto_awesome</span>
             AI-Powered Background Removal
           </div>
           <h1 className="hero-title">
-            Remove backgrounds<br /><strong>in seconds</strong>
+            Remove backgrounds <span className="gradient-text font-bold">in seconds</span>
           </h1>
           <p className="hero-body">
-            Default: remove.bg API for excellent quality. Browse the marketplace for more local models.
+            Professional-grade image background removal. Process locally in your browser with U2-Net, ISNet, and BiRefNet, or connect via cloud API.
           </p>
-        </div>
+        </header>
 
-        {/* Main two-column layout */}
+        {/* Dashboard Grid */}
         <div className="content-grid">
-
-          {/* Left: Controls */}
-          <aside className="md-card controls-panel">
+          
+          {/* Controls Column (Left) */}
+          <aside className="glass-panel controls-panel">
             <div className="panel-section">
-              <p className="section-label">AI Model</p>
+              <h2 className="section-label">Select AI Model</h2>
               <ModelSelector 
                 models={models} 
                 selected={selectedModel} 
@@ -211,21 +255,21 @@ export default function App() {
 
             <div className="panel-divider" />
 
-            {/* Alpha matting toggle */}
+            {/* Fine-tuning & Details */}
             <div className="panel-section">
-              <p className="section-label">Options</p>
+              <h2 className="section-label">Tuning Options</h2>
               <AlphaMattingToggle value={alphaMatting} onChange={setAlphaMatting} />
             </div>
 
             <div className="panel-divider" />
 
-            {/* Action button */}
-            <div className="panel-section" style={{ paddingBottom: 24 }}>
+            {/* Run Operations Block */}
+            <div className="panel-section action-section">
               {originalFile && !loading && (
                 <button
-                  className="md-btn-filled"
-                  style={{ width: '100%', justifyContent: 'center' }}
+                  className="glow-btn full-width"
                   onClick={handleRemoveBg}
+                  type="button"
                 >
                   <span className="material-icons-round">auto_fix_high</span>
                   Remove Background
@@ -233,84 +277,85 @@ export default function App() {
               )}
 
               {!originalFile && (
-                <p style={{
-                  fontSize: 'var(--md-typescale-body-small)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                  textAlign: 'center',
-                  lineHeight: 1.6,
-                }}>
-                  Upload an image to get started
-                </p>
+                <div className="idle-controls-prompt">
+                  <span className="material-icons-round prompt-icon">cloud_upload</span>
+                  <p>Upload an image to start background removal</p>
+                </div>
               )}
             </div>
 
-            {/* Progress */}
+            {/* Processing Progress */}
             {loading && (
               <div className="progress-section">
-                <div className="md-linear-progress">
-                  <div className="md-linear-progress-fill" style={{ width: `${progress}%` }} />
+                <div className="linear-progress-bar">
+                  <div className="linear-progress-fill" style={{ width: `${progress}%` }} />
                 </div>
-                <p className="progress-label">Processing with {currentModel?.name}…</p>
+                <p className="progress-label">
+                  Processing with <strong>{currentModel?.name || selectedModel}</strong>…
+                </p>
               </div>
             )}
           </aside>
 
-          {/* Error banner outside panel so it spans */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Results/Upload Column (Right) */}
+          <div className="workspace-column">
             {error && (
-              <div className="md-error-banner">
+              <div className="error-banner">
                 <span className="material-icons-round">error_outline</span>
                 <p>{error}</p>
               </div>
             )}
 
-            {/* Right: Upload / Result */}
-            <section className="md-card upload-result-panel">
-              {!originalUrl
-                ? <UploadZone onFileSelect={handleFileSelect} />
-                : <ResultPanel
-                    originalUrl={originalUrl}
-                    resultUrl={resultUrl}
-                    loading={loading}
-                    onReset={handleReset}
-                    fileName={originalFile?.name}
-                  />
-              }
+            <section className="glass-panel workspace-card">
+              {!originalUrl ? (
+                <UploadZone onFileSelect={handleFileSelect} />
+              ) : (
+                <ResultPanel
+                  originalUrl={originalUrl}
+                  resultUrl={resultUrl}
+                  loading={loading}
+                  onReset={handleReset}
+                  fileName={originalFile?.name}
+                />
+              )}
             </section>
           </div>
+
         </div>
 
-        {/* Model info cards */}
-        <section className="models-section">
+        {/* Informative model comparison grid */}
+        <section className="models-info-section">
           <div className="section-header">
-            <h2>About the models</h2>
-            <p>Each model is optimised for different use cases. Choose based on your needs.</p>
+            <h2>Supported AI Engine Details</h2>
+            <p>Our model registry allows you to scale the background removal accuracy based on local resource limits.</p>
           </div>
 
-          <div className="models-grid">
+          <div className="models-info-grid">
             {models.filter(m => m.enabled !== false).map(m => {
               const stats = MODEL_STATS[m.id]
               if (!stats) return null
               const chipClass = m.id === 'remove.bg' ? 'api' : m.id === 'u2net' ? 'fast' : m.id === 'isnet-general-use' ? 'balanced' : 'best'
               return (
-                <div key={m.id} className="model-info-card">
-                  <div className="model-info-header">
-                    <span className="model-info-name">{m.name}</span>
-                    <span className={`model-chip model-chip--${chipClass}`}>{m.badge}</span>
+                <div key={m.id} className="info-card">
+                  <div className="info-card-header">
+                    <span className="info-card-name">{m.name}</span>
+                    <span className={`badge-chip badge-${chipClass}`}>{m.badge}</span>
                   </div>
-                  <p className="model-info-description">{m.description}</p>
-                  <div className="model-info-stats">
-                    <div className="stat-bar">
-                      <span className="stat-label">Speed</span>
-                      <div className="stat-track">
-                        <div className="stat-fill" style={{ width: `${stats.speed}%` }} />
+                  <p className="info-card-desc">{m.description}</p>
+                  <div className="info-card-stats">
+                    <div className="stat-row">
+                      <span className="stat-name">Speed</span>
+                      <div className="stat-meter-track">
+                        <div className="stat-meter-fill fill-speed" style={{ width: `${stats.speed}%` }} />
                       </div>
+                      <span className="stat-percentage">{stats.speed}%</span>
                     </div>
-                    <div className="stat-bar">
-                      <span className="stat-label">Accuracy</span>
-                      <div className="stat-track">
-                        <div className="stat-fill" style={{ width: `${stats.accuracy}%` }} />
+                    <div className="stat-row">
+                      <span className="stat-name">Quality</span>
+                      <div className="stat-meter-track">
+                        <div className="stat-meter-fill fill-quality" style={{ width: `${stats.accuracy}%` }} />
                       </div>
+                      <span className="stat-percentage">{stats.accuracy}%</span>
                     </div>
                   </div>
                 </div>
@@ -322,7 +367,7 @@ export default function App() {
 
       <Footer />
 
-      {/* Marketplace Modal */}
+      {/* Marketplace Registry Overlay */}
       {showMarketplace && (
         <Marketplace 
           onClose={() => setShowMarketplace(false)}
