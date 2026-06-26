@@ -1,198 +1,179 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './Marketplace.css'
 
 export default function Marketplace({ onClose, onModelDownloaded }) {
-  const [models, setModels] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [models, setModels]         = useState([])
+  const [loading, setLoading]       = useState(true)
   const [downloading, setDownloading] = useState({})
-  const [error, setError] = useState(null)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [error, setError]           = useState(null)
+  const [query, setQuery]           = useState('')
 
-  useEffect(() => {
-    fetchMarketplaceModels()
-  }, [])
+  useEffect(() => { fetchModels() }, [])
 
-  const fetchMarketplaceModels = async () => {
+  const fetchModels = async () => {
     try {
-      const res = await fetch('/api/marketplace')
+      const res  = await fetch('/api/marketplace')
       const data = await res.json()
-      setModels(Object.entries(data.models || {}).map(([id, model]) => ({
-        id,
-        ...model
-      })))
+      /* Exclude the 2 main UI models — user already sees them */
+      const HIDDEN = ['remove.bg']
+      setModels(
+        Object.entries(data.models || {})
+          .filter(([id]) => !HIDDEN.includes(id))
+          .map(([id, m]) => ({ id, ...m }))
+      )
       setLoading(false)
     } catch {
-      setError('Failed to load marketplace models from host server.')
+      setError('Could not load the marketplace — check backend connectivity.')
       setLoading(false)
     }
   }
 
-  const handleDownload = async (modelId) => {
-    setDownloading(prev => ({ ...prev, [modelId]: true }))
+  const handleDownload = useCallback(async (modelId) => {
+    setDownloading((d) => ({ ...d, [modelId]: true }))
     setError(null)
-
     try {
-      const res = await fetch(`/api/marketplace/${modelId}/download`, { method: 'POST' })
+      const res  = await fetch(`/api/marketplace/${modelId}/download`, { method: 'POST' })
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.detail || 'Download operation failed.')
-      }
-
-      if (onModelDownloaded) {
-        onModelDownloaded()
-      }
-
-      alert(`${data.message}`)
+      if (!res.ok) throw new Error(data.detail || 'Download failed')
+      if (onModelDownloaded) onModelDownloaded()
+      alert(data.message)
     } catch (e) {
       setError(e.message)
     } finally {
-      setDownloading(prev => ({ ...prev, [modelId]: false }))
+      setDownloading((d) => ({ ...d, [modelId]: false }))
     }
-  }
+  }, [onModelDownloaded])
 
-  const getSpeedBadge = (speed) => {
-    const speedClass = {
-      'Very Fast': 'very-fast',
-      'Fast': 'fast',
-      'Medium': 'medium',
-      'Slower': 'slow'
-    }[speed] || 'medium'
-    return speedClass
-  }
+  /* Close on Escape */
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
 
-  const getAccuracyBadge = (accuracy) => {
-    const accuracyClass = {
-      'Excellent': 'excellent',
-      'Best': 'best',
-      'High': 'high',
-      'Good': 'good',
-      'Medium': 'medium'
-    }[accuracy] || 'medium'
-    return accuracyClass
-  }
-
-  const filteredModels = models.filter(m => 
-    m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    m.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = models.filter(
+    (m) =>
+      m.name.toLowerCase().includes(query.toLowerCase()) ||
+      m.description.toLowerCase().includes(query.toLowerCase())
   )
 
+  const speedColor = (s) => ({
+    'Very Fast': '#16a34a',
+    'Fast': '#16a34a',
+    'Medium': '#d97706',
+    'Slower': '#dc2626',
+  }[s] ?? '#6b7280')
+
   return (
-    <div className="marketplace-overlay">
-      <div className="marketplace-modal glass-panel">
-        
-        {/* Header bar */}
-        <div className="marketplace-header">
-          <div className="header-meta">
-            <span className="registry-eyebrow">AI Registry Hub</span>
-            <h2>Model Marketplace</h2>
-            <p>Download and deploy specialized neural networks for on-device background processing.</p>
+    <div className="mp-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="mp-modal" role="dialog" aria-modal="true" aria-label="Model Marketplace">
+
+        {/* Header */}
+        <div className="mp-header">
+          <div>
+            <h2 className="mp-title">Model Marketplace</h2>
+            <p className="mp-sub">Download additional AI models to run locally</p>
           </div>
-          <button className="close-circle-btn" onClick={onClose} type="button" aria-label="Close Marketplace">
+          <button className="btn-icon" onClick={onClose} aria-label="Close">
             <span className="material-icons-round">close</span>
           </button>
         </div>
 
-        {/* Search controls */}
-        <div className="marketplace-controls">
-          <div className="search-input-wrap">
-            <span className="material-icons-round search-icon">search</span>
-            <input 
-              type="text" 
-              placeholder="Search registry models..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
+        {/* Search */}
+        <div className="mp-search-wrap">
+          <span className="material-icons-round mp-search-icon">search</span>
+          <input
+            className="mp-search"
+            type="text"
+            placeholder="Search models…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="error-banner">
+          <div className="error-bar" style={{ marginBottom: 12 }}>
             <span className="material-icons-round">error_outline</span>
-            <p>{error}</p>
+            <span>{error}</span>
           </div>
         )}
 
-        {/* Models list / loading */}
-        {loading ? (
-          <div className="marketplace-loading-state">
-            <div className="spinner-loader" />
-            <p>Fetching remote model registry catalog...</p>
-          </div>
-        ) : (
-          <div className="marketplace-scroll-area">
-            {filteredModels.length === 0 ? (
-              <div className="no-results-state">
-                <span className="material-icons-round no-results-icon">search_off</span>
-                <p>No models match "{searchTerm}"</p>
-              </div>
-            ) : (
-              <div className="marketplace-cards-grid">
-                {filteredModels.map(model => {
-                  const isDownloading = downloading[model.id]
-                  return (
-                    <div key={model.id} className="registry-card">
-                      <div className="card-top-section">
-                        <div className="card-titles">
-                          <h3>{model.name}</h3>
-                          <span className={`card-type-chip type-${model.type}`}>
-                            {model.type === 'builtin' ? 'Local built-in' : 'External network'}
-                          </span>
-                        </div>
+        {/* Body */}
+        <div className="mp-body">
+          {loading ? (
+            <div className="mp-state">
+              <span className="spinner" />
+              <span>Loading marketplace…</span>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="mp-state">
+              <span className="material-icons-round" style={{ fontSize: 32, marginBottom: 8 }}>search_off</span>
+              <span>No models match "{query}"</span>
+            </div>
+          ) : (
+            <div className="mp-grid">
+              {filtered.map((m) => {
+                const busy = downloading[m.id]
+                return (
+                  <div key={m.id} className="mp-card">
+                    <div className="mp-card-top">
+                      <div>
+                        <p className="mp-model-name">{m.name}</p>
+                        <p className="mp-model-desc">{m.description}</p>
                       </div>
-
-                      <p className="card-description">{model.description}</p>
-
-                      {/* Model parameters stats */}
-                      <div className="card-metrics-grid">
-                        <div className="metric-box">
-                          <span className="metric-box-label">Inference speed</span>
-                          <span className={`metric-box-val speed-${getSpeedBadge(model.speed)}`}>
-                            {model.speed}
-                          </span>
-                        </div>
-                        <div className="metric-box">
-                          <span className="metric-box-label">Quality grade</span>
-                          <span className={`metric-box-val accuracy-${getAccuracyBadge(model.accuracy)}`}>
-                            {model.accuracy}
-                          </span>
-                        </div>
-                        {model.size_mb && (
-                          <div className="metric-box">
-                            <span className="metric-box-label">Download size</span>
-                            <span className="metric-box-val size-val">
-                              {model.size_mb} MB
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      <button
-                        className={`download-action-btn ${isDownloading ? 'loading' : ''}`}
-                        onClick={() => handleDownload(model.id)}
-                        disabled={isDownloading}
-                        type="button"
-                      >
-                        {isDownloading ? (
-                          <>
-                            <div className="btn-spinner" />
-                            <span>Downloading weights...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="material-icons-round">download</span>
-                            <span>{model.type === 'builtin' ? 'Initialize Engine' : 'Download Model'}</span>
-                          </>
-                        )}
-                      </button>
+                      <span className={`badge ${m.type === 'builtin' ? 'badge-local' : 'badge-cloud'}`}>
+                        {m.type === 'builtin' ? 'Local' : 'External'}
+                      </span>
                     </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
+
+                    <div className="mp-meta">
+                      <span className="mp-stat">
+                        <span className="mp-stat-label">Speed</span>
+                        <span className="mp-stat-val" style={{ color: speedColor(m.speed) }}>{m.speed}</span>
+                      </span>
+                      <span className="mp-sep" />
+                      <span className="mp-stat">
+                        <span className="mp-stat-label">Quality</span>
+                        <span className="mp-stat-val">{m.accuracy}</span>
+                      </span>
+                      {m.size_mb && (
+                        <>
+                          <span className="mp-sep" />
+                          <span className="mp-stat">
+                            <span className="mp-stat-label">Size</span>
+                            <span className="mp-stat-val">{m.size_mb} MB</span>
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    <button
+                      className="btn-primary mp-dl-btn"
+                      onClick={() => handleDownload(m.id)}
+                      disabled={busy}
+                      type="button"
+                    >
+                      {busy ? (
+                        <><span className="spinner" style={{ width: 14, height: 14 }} /> Downloading…</>
+                      ) : (
+                        <><span className="material-icons-round">download</span>
+                          {m.type === 'builtin' ? 'Load model' : 'Download'}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer note */}
+        <div className="mp-footer-note">
+          <span className="material-icons-round">info</span>
+          Heavy models (ISNet, BiRefNet) require &gt;512 MB RAM. Use U2-Net on Render free tier.
+        </div>
       </div>
     </div>
   )

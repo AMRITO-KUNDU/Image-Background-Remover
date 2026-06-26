@@ -1,31 +1,29 @@
 import { useState } from 'react'
 import './ResultPanel.css'
 
-const BACKGROUND_PRESETS = [
-  { id: 'transparent', name: 'Transparent', class: 'checkerboard' },
-  { id: 'white', name: 'White', color: '#ffffff' },
-  { id: 'dark', name: 'Dark Slate', color: '#0f172a' },
-  { id: 'blue', name: 'Ice Blue', color: '#3b82f6' },
-  { id: 'emerald', name: 'Emerald', color: '#10b981' },
-  { id: 'pink', name: 'Pastel Pink', color: '#f472b6' },
-  { id: 'gradient-ocean', name: 'Ocean', gradient: 'linear-gradient(135deg, #06b6d4, #3b82f6)' },
-  { id: 'gradient-sunset', name: 'Sunset', gradient: 'linear-gradient(135deg, #f43f5e, #f97316)' },
-  { id: 'gradient-cyber', name: 'Cyber', gradient: 'linear-gradient(135deg, #f43f5e, #6366f1)' },
-  { id: 'gradient-space', name: 'Space', gradient: 'linear-gradient(135deg, #180f2b, #090514)' },
+const BG_PRESETS = [
+  { id: 'transparent', label: 'Transparent' },
+  { id: 'white',       label: 'White',   color: '#ffffff' },
+  { id: 'black',       label: 'Black',   color: '#000000' },
+  { id: 'gray',        label: 'Gray',    color: '#6b7280' },
+  { id: 'blue',        label: 'Blue',    color: '#2563eb' },
+  { id: 'green',       label: 'Green',   color: '#16a34a' },
+  { id: 'red',         label: 'Red',     color: '#dc2626' },
+  { id: 'yellow',      label: 'Yellow',  color: '#ca8a04' },
+  { id: 'purple',      label: 'Purple',  color: '#7c3aed' },
 ]
 
 export default function ResultPanel({ originalUrl, resultUrl, loading, onReset, fileName }) {
-  const [view, setView] = useState('split') // 'split' | 'result' | 'original'
-  const [sliderPosition, setSliderPosition] = useState(50)
-  const [bgPreset, setBgPreset] = useState('transparent')
+  const [view, setView]           = useState('compare')   // 'compare' | 'result' | 'original'
+  const [sliderPos, setSliderPos] = useState(50)
+  const [bg, setBg]               = useState('transparent')
 
+  /* Canvas-based download */
   const handleDownload = () => {
     if (!resultUrl) return
+    const base = fileName?.replace(/\.[^/.]+$/, '') ?? 'image'
 
-    const base = fileName?.replace(/\.[^/.]+$/, '') || 'image'
-
-    // If transparent background is selected, download directly to preserve native blob properties
-    if (bgPreset === 'transparent') {
+    if (bg === 'transparent') {
       const a = document.createElement('a')
       a.href = resultUrl
       a.download = `${base}_no_bg.png`
@@ -33,212 +31,162 @@ export default function ResultPanel({ originalUrl, resultUrl, loading, onReset, 
       return
     }
 
-    // Otherwise, bake the selected color or gradient background into the output using HTML5 Canvas
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.src = resultUrl
     img.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = img.naturalWidth
-      canvas.height = img.naturalHeight
-      
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-
-      // Render custom background on canvas
-      const activePreset = BACKGROUND_PRESETS.find(p => p.id === bgPreset)
-      if (activePreset) {
-        if (activePreset.gradient) {
-          // Draw gradient
-          const grad = ctx.createLinearGradient(0, 0, 0, canvas.height)
-          if (bgPreset === 'gradient-ocean') {
-            grad.addColorStop(0, '#06b6d4')
-            grad.addColorStop(1, '#3b82f6')
-          } else if (bgPreset === 'gradient-sunset') {
-            grad.addColorStop(0, '#f43f5e')
-            grad.addColorStop(1, '#f97316')
-          } else if (bgPreset === 'gradient-cyber') {
-            grad.addColorStop(0, '#f43f5e')
-            grad.addColorStop(1, '#6366f1')
-          } else if (bgPreset === 'gradient-space') {
-            grad.addColorStop(0, '#180f2b')
-            grad.addColorStop(1, '#090514')
-          } else {
-            grad.addColorStop(0, '#000000')
-            grad.addColorStop(1, '#ffffff')
-          }
-          ctx.fillStyle = grad
-        } else {
-          // Draw solid color
-          ctx.fillStyle = activePreset.color || '#ffffff'
-        }
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-      }
-
-      // Draw original transparent subject on top
+      const c = document.createElement('canvas')
+      c.width = img.naturalWidth
+      c.height = img.naturalHeight
+      const ctx = c.getContext('2d')
+      const preset = BG_PRESETS.find((p) => p.id === bg)
+      ctx.fillStyle = preset?.color ?? '#ffffff'
+      ctx.fillRect(0, 0, c.width, c.height)
       ctx.drawImage(img, 0, 0)
-
-      // Download
       const a = document.createElement('a')
-      a.href = canvas.toDataURL('image/png')
-      a.download = `${base}_lumina.png`
+      a.href = c.toDataURL('image/png')
+      a.download = `${base}_bg_${bg}.png`
       a.click()
     }
   }
 
-  const TABS = [
-    { id: 'original', label: 'Original', icon: 'photo' },
-    { id: 'result', label: 'Result', icon: 'auto_fix_high' },
-    { id: 'split', label: 'Compare Slider', icon: 'compare' },
-  ]
+  const currentBg = BG_PRESETS.find((p) => p.id === bg)
 
-  // Inline style builders for background presets
-  const getPresetStyle = (preset) => {
-    if (preset.gradient) {
-      return { background: preset.gradient }
-    }
-    if (preset.color) {
-      return { backgroundColor: preset.color }
-    }
-    return {} // transparent default checkerboard handled by class
-  }
-
-  const renderResultImage = () => {
-    const activePreset = BACKGROUND_PRESETS.find(p => p.id === bgPreset)
-    return (
-      <img
-        src={resultUrl}
-        alt="Background Removed"
-        className={`preview-img ${bgPreset === 'transparent' ? 'checkerboard' : ''}`}
-        style={getPresetStyle(activePreset)}
-      />
-    )
-  }
+  /* Inline style for result image background */
+  const resultBgStyle = bg === 'transparent'
+    ? {}
+    : { backgroundColor: currentBg?.color }
 
   return (
     <div className="result-panel">
-      {/* Top Header Segmented Controls */}
-      <div className="panel-header-actions">
-        {resultUrl && (
-          <div className="tab-segmented-control">
-            {TABS.map(t => (
-              <button
-                key={t.id}
-                className={`tab-btn ${view === t.id ? 'active' : ''}`}
-                onClick={() => setView(t.id)}
-                type="button"
-              >
-                <span className="material-icons-round">{t.icon}</span>
-                <span>{t.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
+
+      {/* Tabs */}
+      <div className="result-tabs">
+        {[
+          { id: 'compare',  label: 'Compare', icon: 'compare' },
+          { id: 'result',   label: 'Result',  icon: 'auto_fix_high' },
+          { id: 'original', label: 'Original', icon: 'photo' },
+        ].map((t) => (
+          <button
+            key={t.id}
+            className={`tab-btn ${view === t.id ? 'active' : ''}`}
+            onClick={() => setView(t.id)}
+            type="button"
+          >
+            <span className="material-icons-round">{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {/* Main image presentation viewport */}
+      {/* Viewport */}
       <div className="result-viewport">
         {loading ? (
-          <div className="viewport-state-overlay">
-            <div className="spinner-loader" />
-            <p className="state-text">Removing background...</p>
-          </div>
-        ) : !resultUrl ? (
-          <div className="viewport-state-overlay">
-            <div className="spinner-loader" />
-            <p className="state-text">Waiting for process request...</p>
+          <div className="viewport-state">
+            <span className="spinner" />
+            <span className="state-text">Removing background…</span>
           </div>
         ) : (
-          <div className="image-view-container">
-            {/* Split comparison view slider */}
-            {view === 'split' && (
-              <div className="slider-wrapper">
-                {/* Background Image: Original */}
-                <img src={originalUrl} alt="Original" className="slider-img original" />
+          <>
+            {/* Compare slider */}
+            {view === 'compare' && (
+              <div className="slider-root">
+                {/* Original layer */}
+                <img src={originalUrl} alt="Original" className="slider-layer" />
 
-                {/* Foreground Image: Output with clip path */}
-                <div 
-                  className={`slider-fg-container ${bgPreset === 'transparent' ? 'checkerboard' : ''}`}
-                  style={{ 
-                    clipPath: `inset(0 ${100 - sliderPosition}% 0 0)`,
-                    ...getPresetStyle(BACKGROUND_PRESETS.find(p => p.id === bgPreset))
+                {/* Result layer clipped */}
+                <div
+                  className={`slider-fg ${bg === 'transparent' ? 'checkerboard' : ''}`}
+                  style={{
+                    clipPath: `inset(0 ${100 - sliderPos}% 0 0)`,
+                    ...resultBgStyle,
                   }}
                 >
-                  <img src={resultUrl} alt="Result" className="slider-img result" />
+                  <img
+                    src={resultUrl || originalUrl}
+                    alt="Result"
+                    className="slider-layer"
+                  />
                 </div>
 
-                {/* Custom sliding line handle */}
-                <div className="slider-divider-line" style={{ left: `${sliderPosition}%` }}>
-                  <div className="slider-handle-node">
+                {/* Divider */}
+                <div className="slider-line" style={{ left: `${sliderPos}%` }}>
+                  <div className="slider-handle">
                     <span className="material-icons-round">unfold_more</span>
                   </div>
                 </div>
 
-                {/* Overlaid invisible input range range slider */}
+                {/* Invisible range input */}
                 <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={sliderPosition}
-                  onChange={(e) => setSliderPosition(Number(e.target.value))}
-                  className="slider-range-input"
-                  aria-label="Before/After Compare Slider"
+                  type="range" min="0" max="100"
+                  value={sliderPos}
+                  onChange={(e) => setSliderPos(Number(e.target.value))}
+                  className="slider-input"
+                  aria-label="Compare slider"
                 />
+
+                {/* Labels */}
+                <span className="layer-label label-left">Before</span>
+                <span className="layer-label label-right">After</span>
               </div>
             )}
 
-            {/* Normal original only view */}
+            {/* Single views */}
+            {view === 'result' && (
+              <div className={`single-view ${bg === 'transparent' ? 'checkerboard' : ''}`} style={resultBgStyle}>
+                {resultUrl
+                  ? <img src={resultUrl} alt="Result" className="preview-img" />
+                  : <div className="viewport-state">
+                      <span className="material-icons-round state-icon">image_search</span>
+                      <span className="state-text">Result will appear here</span>
+                    </div>
+                }
+              </div>
+            )}
+
             {view === 'original' && (
-              <div className="single-viewport-container">
+              <div className="single-view">
                 <img src={originalUrl} alt="Original" className="preview-img" />
               </div>
             )}
-
-            {/* Normal result only view */}
-            {view === 'result' && (
-              <div className="single-viewport-container">
-                {renderResultImage()}
-              </div>
-            )}
-          </div>
+          </>
         )}
       </div>
 
-      {/* Under viewport control panel: background changer, action buttons */}
-      {resultUrl && !loading && (
-        <div className="viewport-footer">
-          {/* Background preset choices */}
-          <div className="bg-changer-section">
-            <span className="bg-changer-label">Preview Background</span>
-            <div className="bg-presets-list">
-              {BACKGROUND_PRESETS.map((p) => {
-                const isSelected = bgPreset === p.id
-                return (
-                  <button
-                    key={p.id}
-                    className={`bg-preset-dot ${p.class || ''} ${isSelected ? 'active' : ''}`}
-                    style={getPresetStyle(p)}
-                    onClick={() => setBgPreset(p.id)}
-                    title={p.name}
-                    type="button"
-                  />
-                )
-              })}
-            </div>
-          </div>
-
-          <div className="action-row">
-            <button className="outline-btn" onClick={onReset} type="button">
-              <span className="material-icons-round">refresh</span>
-              New Image
-            </button>
-            <button className="glow-btn" onClick={handleDownload} type="button">
-              <span className="material-icons-round">download</span>
-              Download Image
-            </button>
+      {/* Bottom controls */}
+      <div className="result-footer">
+        {/* Background picker */}
+        <div className="bg-picker">
+          <span className="label-sm">Background</span>
+          <div className="bg-dots">
+            {BG_PRESETS.map((p) => (
+              <button
+                key={p.id}
+                className={`bg-dot ${bg === p.id ? 'active' : ''} ${p.id === 'transparent' ? 'transparent-dot' : ''}`}
+                style={p.color ? { backgroundColor: p.color } : {}}
+                onClick={() => setBg(p.id)}
+                title={p.label}
+                type="button"
+                aria-label={`Background: ${p.label}`}
+              />
+            ))}
           </div>
         </div>
-      )}
+
+        {/* Actions */}
+        <div className="result-actions">
+          <button className="btn-ghost" onClick={onReset} type="button">
+            <span className="material-icons-round">refresh</span>
+            New image
+          </button>
+          {resultUrl && (
+            <button className="btn-primary" onClick={handleDownload} type="button">
+              <span className="material-icons-round">download</span>
+              Download
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

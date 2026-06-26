@@ -7,55 +7,48 @@ import Footer from './components/Footer'
 import Marketplace from './components/Marketplace'
 import './App.css'
 
+/* Only remove.bg + U2-Net (lightest local model: 176 MB, CPU-friendly) shown in UI.
+   All heavier models live exclusively in the Marketplace. */
 const MODELS = [
   {
     id: 'remove.bg',
     name: 'remove.bg API',
-    badge: 'API',
-    description: 'Cloud-based API service with excellent quality',
+    badge: 'Cloud',
+    description: 'Best quality via cloud API — requires API key',
+    icon: 'cloud',
   },
   {
     id: 'u2net',
     name: 'U2-Net',
-    badge: 'Fast',
-    description: 'Quick & lightweight for most images',
-  },
-  {
-    id: 'isnet-general-use',
-    name: 'ISNet',
-    badge: 'Balanced',
-    description: 'Best mix of speed and precision',
-  },
-  {
-    id: 'birefnet-general',
-    name: 'BiRefNet',
-    badge: 'Best',
-    description: 'State-of-the-art, ideal for hair & fur',
+    badge: 'Local',
+    description: 'Fastest local model — runs on 0.5 GB RAM',
+    icon: 'memory',
   },
 ]
 
 const MODEL_STATS = {
-  'remove.bg':        { speed: 95,  accuracy: 100 },
-  'u2net':             { speed: 100, accuracy: 60 },
-  'isnet-general-use': { speed: 80,  accuracy: 80 },
-  'birefnet-general':  { speed: 55,  accuracy: 100 },
+  'remove.bg': { speed: 92, quality: 100 },
+  'u2net':     { speed: 100, quality: 65 },
 }
 
 function AlphaMattingToggle({ value, onChange }) {
   return (
-    <button
-      className={`alpha-toggle ${value ? 'active' : ''}`}
-      onClick={() => onChange(!value)}
-      type="button"
-    >
-      <div className="alpha-toggle-track">
-        <div className="alpha-toggle-thumb" />
-      </div>
-      <div className="alpha-toggle-info">
-        <span className="alpha-toggle-label">Alpha Matting</span>
-        <span className="alpha-toggle-sublabel">Recovers fine details like hair/fur edges</span>
-      </div>
-    </button>
+    <label className="toggle-row">
+      <span
+        className={`toggle-switch ${value ? 'on' : ''}`}
+        onClick={() => onChange(!value)}
+        role="switch"
+        aria-checked={value}
+        tabIndex={0}
+        onKeyDown={(e) => e.key === ' ' && onChange(!value)}
+      >
+        <span className="toggle-knob" />
+      </span>
+      <span className="toggle-label">
+        Alpha matting
+        <span className="toggle-hint">Better edge detail for hair &amp; fur</span>
+      </span>
+    </label>
   )
 }
 
@@ -70,93 +63,78 @@ export default function App() {
   const [error, setError] = useState(null)
   const [progress, setProgress] = useState(0)
   const [showMarketplace, setShowMarketplace] = useState(false)
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('lbg-dark')
+    if (saved !== null) return saved === 'true'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
 
-  // Brand and Theme Customization States
-  const [theme, setTheme] = useState(() => localStorage.getItem('luminabg-theme') || 'dark-lumina')
-  const [borderRadius, setBorderRadius] = useState(() => localStorage.getItem('luminabg-radius') || 'rounded-large')
-
-  // Sync theme and border radius preferences
+  /* Sync dark mode class */
   useEffect(() => {
-    const rootClasses = document.documentElement.classList
-    
-    // Clean up existing theme/radius classes
-    rootClasses.forEach((cls) => {
-      if (cls.startsWith('theme-') || cls.startsWith('radius-')) {
-        rootClasses.remove(cls)
-      }
-    })
+    document.documentElement.classList.toggle('dark', dark)
+    localStorage.setItem('lbg-dark', dark)
+  }, [dark])
 
-    // Apply new preferences
-    rootClasses.add(`theme-${theme}`)
-
-    const radiusMap = {
-      'rounded-none': 'radius-none',
-      'rounded-medium': 'radius-medium',
-      'rounded-large': 'radius-large',
-      'rounded-full': 'radius-full',
-    }
-    rootClasses.add(radiusMap[borderRadius] || 'radius-large')
-
-    // Persist to local storage
-    localStorage.setItem('luminabg-theme', theme)
-    localStorage.setItem('luminabg-radius', borderRadius)
-  }, [theme, borderRadius])
-
+  /* Fetch real model list from API */
   useEffect(() => {
     fetch('/api/models')
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then((data) => {
-        const apiModels = Object.entries(data.models || {}).map(([id, model]) => ({
-          id,
-          name: model.name,
-          badge: model.type === 'api' ? 'API' : model.speed,
-          description: model.description,
-          enabled: model.enabled !== false,
-          disabledReason: model.disabled_reason,
-        }))
+        // Only surface remove.bg and u2net to the main UI
+        const MAIN_IDS = ['remove.bg', 'u2net']
+        const apiModels = Object.entries(data.models || {})
+          .filter(([id]) => MAIN_IDS.includes(id))
+          .map(([id, m]) => ({
+            id,
+            name: m.name,
+            badge: m.type === 'api' ? 'Cloud' : 'Local',
+            description: m.description,
+            icon: id === 'remove.bg' ? 'cloud' : 'memory',
+            enabled: m.enabled !== false,
+            disabledReason: m.disabled_reason,
+          }))
         if (apiModels.length) {
           setModels(apiModels)
-          // Set default to remove.bg if available, otherwise first available model
-          const removeBgModel = apiModels.find(m => m.id === 'remove.bg')
-          if (removeBgModel && removeBgModel.enabled) {
+          const removeBg = apiModels.find((m) => m.id === 'remove.bg' && m.enabled)
+          if (removeBg) {
             setSelectedModel('remove.bg')
           } else {
-            const firstEnabled = apiModels.find(m => m.enabled !== false)
-            if (firstEnabled) setSelectedModel(firstEnabled.id)
+            const first = apiModels.find((m) => m.enabled !== false)
+            if (first) setSelectedModel(first.id)
           }
-        }
-      })
-      .catch(() => {
-        // Keep bundled model metadata when the API is unavailable during local frontend-only dev.
-      })
-  }, [])
-
-  const refreshModels = useCallback(() => {
-    fetch('/api/models')
-      .then((res) => res.json())
-      .then((data) => {
-        const apiModels = Object.entries(data.models || {}).map(([id, model]) => ({
-          id,
-          name: model.name,
-          badge: model.type === 'api' ? 'API' : model.speed,
-          description: model.description,
-          enabled: model.enabled !== false,
-          disabledReason: model.disabled_reason,
-        }))
-        if (apiModels.length) {
-          setModels(apiModels)
         }
       })
       .catch(() => {})
   }, [])
 
-  const handleModelSelect = useCallback((modelId) => {
-    const nextModel = models.find((model) => model.id === modelId)
-    if (nextModel?.enabled === false) {
-      setError(nextModel.disabledReason || 'This model is disabled on the current deployment.')
+  const refreshModels = useCallback(() => {
+    fetch('/api/models')
+      .then((r) => r.json())
+      .then((data) => {
+        const MAIN_IDS = ['remove.bg', 'u2net']
+        const apiModels = Object.entries(data.models || {})
+          .filter(([id]) => MAIN_IDS.includes(id))
+          .map(([id, m]) => ({
+            id,
+            name: m.name,
+            badge: m.type === 'api' ? 'Cloud' : 'Local',
+            description: m.description,
+            icon: id === 'remove.bg' ? 'cloud' : 'memory',
+            enabled: m.enabled !== false,
+            disabledReason: m.disabled_reason,
+          }))
+        if (apiModels.length) setModels(apiModels)
+      })
+      .catch(() => {})
+  }, [])
+
+  const handleModelSelect = useCallback((id) => {
+    const m = models.find((x) => x.id === id)
+    if (m?.enabled === false) {
+      setError(m.disabledReason || 'This model is currently disabled.')
       return
     }
-    setSelectedModel(modelId)
+    setSelectedModel(id)
     setError(null)
   }, [models])
 
@@ -174,22 +152,20 @@ export default function App() {
     setProgress(0)
 
     const interval = setInterval(() => {
-      setProgress(p => Math.min(p + Math.random() * 12, 85))
-    }, 350)
+      setProgress((p) => Math.min(p + Math.random() * 10, 88))
+    }, 400)
 
     try {
-      const formData = new FormData()
-      formData.append('file', originalFile)
-      formData.append('model', selectedModel)
-      formData.append('alpha_matting', alphaMatting.toString())
+      const fd = new FormData()
+      fd.append('file', originalFile)
+      fd.append('model', selectedModel)
+      fd.append('alpha_matting', alphaMatting.toString())
 
-      const res = await fetch('/api/remove-background', { method: 'POST', body: formData })
-
+      const res = await fetch('/api/remove-background', { method: 'POST', body: fd })
       if (!res.ok) {
         const err = await res.json()
         throw new Error(err.detail || 'Processing failed')
       }
-
       setResultUrl(URL.createObjectURL(await res.blob()))
       setProgress(100)
     } catch (e) {
@@ -208,168 +184,152 @@ export default function App() {
     setProgress(0)
   }, [])
 
-  const currentModel = models.find(m => m.id === selectedModel)
+  const currentModel = models.find((m) => m.id === selectedModel)
 
   return (
     <div className="app">
-      {/* Decorative Blur Blobs */}
-      <div className="glow-blob glow-blob-1"></div>
-      <div className="glow-blob glow-blob-2"></div>
-
-      <Header 
-        theme={theme} 
-        setTheme={setTheme}
-        borderRadius={borderRadius}
-        setBorderRadius={setBorderRadius}
-      />
+      <Header dark={dark} onToggleDark={() => setDark((d) => !d)} />
 
       <main className="main">
-        {/* Premium Landing Hero */}
-        <header className="hero">
-          <div className="hero-eyebrow">
-            <span className="material-icons-round">auto_awesome</span>
-            AI-Powered Background Removal
-          </div>
-          <h1 className="hero-title">
-            Remove backgrounds <span className="gradient-text font-bold">in seconds</span>
-          </h1>
-          <p className="hero-body">
-            Professional-grade image background removal. Process locally in your browser with U2-Net, ISNet, and BiRefNet, or connect via cloud API.
+        {/* Page hero */}
+        <div className="hero">
+          <h1 className="hero-title">Remove image backgrounds</h1>
+          <p className="hero-sub">
+            Powered by U2-Net locally or remove.bg cloud API.
+            No uploads stored, 100% private.
           </p>
-        </header>
+        </div>
 
-        {/* Dashboard Grid */}
-        <div className="content-grid">
-          
-          {/* Controls Column (Left) */}
-          <aside className="glass-panel controls-panel">
+        {/* Two-column workspace */}
+        <div className="workspace">
+
+          {/* ── Left panel: controls ── */}
+          <aside className="panel controls-panel">
+
+            {/* Model selector */}
             <div className="panel-section">
-              <h2 className="section-label">Select AI Model</h2>
-              <ModelSelector 
-                models={models} 
-                selected={selectedModel} 
+              <p className="label-sm">AI Model</p>
+              <ModelSelector
+                models={models}
+                selected={selectedModel}
                 onSelect={handleModelSelect}
                 onOpenMarketplace={() => setShowMarketplace(true)}
               />
             </div>
 
-            <div className="panel-divider" />
+            <div className="divider" />
 
-            {/* Fine-tuning & Details */}
+            {/* Options */}
             <div className="panel-section">
-              <h2 className="section-label">Tuning Options</h2>
+              <p className="label-sm">Options</p>
               <AlphaMattingToggle value={alphaMatting} onChange={setAlphaMatting} />
             </div>
 
-            <div className="panel-divider" />
+            <div className="divider" />
 
-            {/* Run Operations Block */}
-            <div className="panel-section action-section">
+            {/* Action / status */}
+            <div className="panel-section">
               {originalFile && !loading && (
-                <button
-                  className="glow-btn full-width"
-                  onClick={handleRemoveBg}
-                  type="button"
-                >
+                <button className="btn-primary run-btn" onClick={handleRemoveBg}>
                   <span className="material-icons-round">auto_fix_high</span>
                   Remove Background
                 </button>
               )}
-
               {!originalFile && (
-                <div className="idle-controls-prompt">
-                  <span className="material-icons-round prompt-icon">cloud_upload</span>
-                  <p>Upload an image to start background removal</p>
-                </div>
+                <p className="idle-hint">Upload an image to get started.</p>
               )}
             </div>
 
-            {/* Processing Progress */}
+            {/* Progress */}
             {loading && (
-              <div className="progress-section">
-                <div className="linear-progress-bar">
-                  <div className="linear-progress-fill" style={{ width: `${progress}%` }} />
+              <div className="panel-section progress-area">
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${progress}%` }} />
                 </div>
-                <p className="progress-label">
-                  Processing with <strong>{currentModel?.name || selectedModel}</strong>…
+                <p className="progress-text">
+                  Processing with {currentModel?.name}…
                 </p>
               </div>
             )}
           </aside>
 
-          {/* Results/Upload Column (Right) */}
-          <div className="workspace-column">
+          {/* ── Right panel: upload / result ── */}
+          <div className="workspace-right">
             {error && (
-              <div className="error-banner">
+              <div className="error-bar" role="alert">
                 <span className="material-icons-round">error_outline</span>
-                <p>{error}</p>
+                <span>{error}</span>
               </div>
             )}
 
-            <section className="glass-panel workspace-card">
-              {!originalUrl ? (
-                <UploadZone onFileSelect={handleFileSelect} />
-              ) : (
-                <ResultPanel
-                  originalUrl={originalUrl}
-                  resultUrl={resultUrl}
-                  loading={loading}
-                  onReset={handleReset}
-                  fileName={originalFile?.name}
-                />
-              )}
+            <section className="panel image-panel">
+              {!originalUrl
+                ? <UploadZone onFileSelect={handleFileSelect} />
+                : <ResultPanel
+                    originalUrl={originalUrl}
+                    resultUrl={resultUrl}
+                    loading={loading}
+                    onReset={handleReset}
+                    fileName={originalFile?.name}
+                  />
+              }
             </section>
           </div>
-
         </div>
 
-        {/* Informative model comparison grid */}
-        <section className="models-info-section">
-          <div className="section-header">
-            <h2>Supported AI Engine Details</h2>
-            <p>Our model registry allows you to scale the background removal accuracy based on local resource limits.</p>
-          </div>
-
-          <div className="models-info-grid">
-            {models.filter(m => m.enabled !== false).map(m => {
-              const stats = MODEL_STATS[m.id]
-              if (!stats) return null
-              const chipClass = m.id === 'remove.bg' ? 'api' : m.id === 'u2net' ? 'fast' : m.id === 'isnet-general-use' ? 'balanced' : 'best'
+        {/* Model info strip */}
+        <div className="model-strip">
+          <h2 className="strip-title">Available models</h2>
+          <div className="model-cards">
+            {models.filter((m) => m.enabled !== false).map((m) => {
+              const s = MODEL_STATS[m.id]
+              if (!s) return null
               return (
-                <div key={m.id} className="info-card">
-                  <div className="info-card-header">
-                    <span className="info-card-name">{m.name}</span>
-                    <span className={`badge-chip badge-${chipClass}`}>{m.badge}</span>
+                <div key={m.id} className="model-card">
+                  <div className="model-card-header">
+                    <span className="model-card-name">{m.name}</span>
+                    <span className={`badge badge-${m.id === 'remove.bg' ? 'cloud' : 'local'}`}>{m.badge}</span>
                   </div>
-                  <p className="info-card-desc">{m.description}</p>
-                  <div className="info-card-stats">
-                    <div className="stat-row">
-                      <span className="stat-name">Speed</span>
-                      <div className="stat-meter-track">
-                        <div className="stat-meter-fill fill-speed" style={{ width: `${stats.speed}%` }} />
+                  <p className="model-card-desc">{m.description}</p>
+                  <div className="model-bars">
+                    <div className="bar-row">
+                      <span className="bar-label">Speed</span>
+                      <div className="bar-track">
+                        <div className="bar-fill" style={{ width: `${s.speed}%` }} />
                       </div>
-                      <span className="stat-percentage">{stats.speed}%</span>
                     </div>
-                    <div className="stat-row">
-                      <span className="stat-name">Quality</span>
-                      <div className="stat-meter-track">
-                        <div className="stat-meter-fill fill-quality" style={{ width: `${stats.accuracy}%` }} />
+                    <div className="bar-row">
+                      <span className="bar-label">Quality</span>
+                      <div className="bar-track">
+                        <div className="bar-fill bar-fill-alt" style={{ width: `${s.quality}%` }} />
                       </div>
-                      <span className="stat-percentage">{stats.accuracy}%</span>
                     </div>
                   </div>
                 </div>
               )
             })}
+
+            {/* Marketplace CTA card */}
+            <div
+              className="model-card model-card-cta"
+              onClick={() => setShowMarketplace(true)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setShowMarketplace(true)}
+            >
+              <span className="material-icons-round cta-icon">storefront</span>
+              <p className="model-card-name">More models</p>
+              <p className="model-card-desc">Browse ISNet, BiRefNet, MODNet and more in the marketplace.</p>
+              <span className="cta-link">Open Marketplace →</span>
+            </div>
           </div>
-        </section>
+        </div>
       </main>
 
       <Footer />
 
-      {/* Marketplace Registry Overlay */}
       {showMarketplace && (
-        <Marketplace 
+        <Marketplace
           onClose={() => setShowMarketplace(false)}
           onModelDownloaded={refreshModels}
         />

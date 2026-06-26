@@ -33,37 +33,21 @@ MODELS_DIR = Path(MODEL_CACHE_DIR) if MODEL_CACHE_DIR else Path(__file__).parent
 MODELS_DIR.mkdir(exist_ok=True)
 
 # Marketplace model registry - rembg library models
+# u2net is the ONLY local model shown in the main UI (lightest: 176 MB, CPU-only friendly).
+# All others live exclusively in the marketplace for users who want higher quality.
 MARKETPLACE_MODELS = {
     "u2net": {
         "name": "U2-Net",
-        "description": "Fastest CPU-friendly option. Recommended for Render free tier.",
+        "description": "Recommended for Render free tier (0.5 GB RAM). Fast, CPU-only, 176 MB.",
         "speed": "Fast",
         "accuracy": "Good",
         "size_mb": 176,
-        "download_url": None,  # Built-in to rembg
-        "type": "builtin"
-    },
-    "isnet-general-use": {
-        "name": "ISNet",
-        "description": "Higher quality, but needs more RAM/CPU than free hosting usually provides.",
-        "speed": "Medium",
-        "accuracy": "High",
-        "size_mb": 200,
-        "download_url": None,  # Built-in to rembg
-        "type": "builtin"
-    },
-    "birefnet-general": {
-        "name": "BiRefNet",
-        "description": "Best quality, but too heavy for most free-tier containers.",
-        "speed": "Slower",
-        "accuracy": "Best",
-        "size_mb": 400,
-        "download_url": None,  # Built-in to rembg
+        "download_url": None,
         "type": "builtin"
     },
     "u2netp": {
         "name": "U2-Net-P",
-        "description": "Lightweight version of U2-Net with faster inference.",
+        "description": "Ultra-lightweight U2-Net variant. Fastest inference, lower quality. 100 MB.",
         "speed": "Very Fast",
         "accuracy": "Medium",
         "size_mb": 100,
@@ -72,7 +56,7 @@ MARKETPLACE_MODELS = {
     },
     "silueta": {
         "name": "Silueta",
-        "description": "Optimized for portrait and human silhouette extraction.",
+        "description": "Optimised for portrait / human silhouette extraction. 50 MB.",
         "speed": "Fast",
         "accuracy": "Good",
         "size_mb": 50,
@@ -81,13 +65,31 @@ MARKETPLACE_MODELS = {
     },
     "modnet": {
         "name": "MODNet",
-        "description": "Real-time portrait matting with good accuracy.",
+        "description": "Real-time portrait matting. Requires ~300 MB RAM. 80 MB model.",
         "speed": "Very Fast",
         "accuracy": "Medium",
         "size_mb": 80,
         "download_url": None,
         "type": "builtin"
-    }
+    },
+    "isnet-general-use": {
+        "name": "ISNet",
+        "description": "Higher quality than U2-Net. Requires ~600 MB RAM \u2014 not suitable for free tier. 200 MB.",
+        "speed": "Medium",
+        "accuracy": "High",
+        "size_mb": 200,
+        "download_url": None,
+        "type": "builtin"
+    },
+    "birefnet-general": {
+        "name": "BiRefNet",
+        "description": "State-of-the-art quality. Requires ~1.5 GB RAM \u2014 upgrade Render plan. 400 MB.",
+        "speed": "Slower",
+        "accuracy": "Best",
+        "size_mb": 400,
+        "download_url": None,
+        "type": "builtin"
+    },
 }
 
 SUPPORTED_MODELS = {
@@ -101,35 +103,45 @@ SUPPORTED_MODELS = {
     }
 }
 
-HEAVY_MODELS = {"isnet-general-use", "birefnet-general"}
+# Heavy models need >512 MB RAM — disabled on free tier by default
+HEAVY_MODELS = {"isnet-general-use", "birefnet-general", "modnet"}
 _sessions: dict = {}
 _rembg = None
 
 
 def available_models():
     models = {}
-    
-    # Add remove.bg as default if API key is available
-    if REMOVE_BG_API_KEY:
-        models["remove.bg"] = {
-            **SUPPORTED_MODELS["remove.bg"],
-            "enabled": True
-        }
-    
-    # Add downloaded/built-in rembg models
+
+    # Always include remove.bg entry; disabled when no API key is set so the
+    # frontend can show it greyed out with a helpful message.
+    models["remove.bg"] = {
+        **SUPPORTED_MODELS["remove.bg"],
+        "enabled": bool(REMOVE_BG_API_KEY),
+        "disabled_reason": None if REMOVE_BG_API_KEY else "Set REMOVE_BG_API_KEY to enable cloud processing.",
+    }
+
+    # u2net is always available — it is the recommended free-tier local model
+    models["u2net"] = {
+        **MARKETPLACE_MODELS["u2net"],
+        "enabled": True,
+    }
+
+    # All remaining marketplace models are surfaced but may be disabled on free tier
     for model_id, details in MARKETPLACE_MODELS.items():
+        if model_id == "u2net":
+            continue  # already added above
         if model_id in HEAVY_MODELS and not ENABLE_HEAVY_MODELS:
             models[model_id] = {
                 **details,
                 "enabled": False,
-                "disabled_reason": "Disabled on the free tier to avoid memory/time-out errors. Upgrade Render or set ENABLE_HEAVY_MODELS=true."
+                "disabled_reason": (
+                    f"{details['name']} requires more RAM than the free tier provides. "
+                    "Upgrade Render or set ENABLE_HEAVY_MODELS=true."
+                ),
             }
         else:
-            models[model_id] = {
-                **details,
-                "enabled": True
-            }
-    
+            models[model_id] = {**details, "enabled": True}
+
     return models
 
 
