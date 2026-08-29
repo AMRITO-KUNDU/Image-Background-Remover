@@ -4,6 +4,7 @@ Exposes UI + API for the Vercel frontend.
 """
 
 import gradio as gr
+import spaces
 from rembg import remove, new_session
 from PIL import Image
 import io
@@ -25,6 +26,7 @@ def get_session(model_name: str):
     return _sessions[model_name]
 
 
+@spaces.GPU
 def remove_bg(image: Image.Image, model: str = "u2net", alpha_matting: bool = False):
     if image is None:
         return None
