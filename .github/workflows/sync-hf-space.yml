@@ -1,0 +1,51 @@
+name: Sync hf-space to Hugging Face
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'hf-space/**'
+  workflow_dispatch:   # allows manual run from Actions tab
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Push hf-space to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Required secrets/variables
+          if [ -z "$HF_TOKEN" ]; then
+            echo "Error: HF_TOKEN secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ vars.HF_USERNAME }}" ] || [ -z "${{ vars.HF_SPACE_NAME }}" ]; then
+            echo "Error: Set repository variables HF_USERNAME and HF_SPACE_NAME"
+            exit 1
+          fi
+
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          # Clone the Space
+          git clone https://oauth2:${HF_TOKEN}@huggingface.co/spaces/${{ vars.HF_USERNAME }}/${{ vars.HF_SPACE_NAME }} space-repo
+
+          # Copy only the files from hf-space/
+          rm -rf space-repo/*
+          cp -r hf-space/. space-repo/
+
+          cd space-repo
+          git add .
+          git status
+
+          # Commit & push only if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to push"
+          else
+            git commit -m "Sync from GitHub $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
