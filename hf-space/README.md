@@ -3,53 +3,38 @@ title: BG Remover Models
 emoji: 🖼️
 colorFrom: blue
 colorTo: indigo
-sdk: docker
-app_port: 7860
+sdk: gradio
+sdk_version: "5.0.0"
+app_file: app.py
 pinned: false
 license: mit
-short_description: U2-Net, ISNet and BiRefNet background removal API
+short_description: U2-Net / ISNet / BiRefNet background removal
 ---
 
-# BG Remover Models
+# BG Remover Models (Gradio)
 
-FastAPI service for background removal using **U2-Net**, **ISNet**, **BiRefNet** and related rembg models.
+Free-tier friendly **Gradio** Space (use **ZeroGPU** if your free account allows it).
 
-## API
+## Models
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/` | Service info |
-| GET | `/api/health` | Health check |
-| GET | `/api/models` | List available models |
-| POST | `/api/remove-background` | Remove background |
+- u2net, u2netp, isnet-general-use, birefnet-general, silueta
 
-### POST `/api/remove-background`
+## API for the main app
 
-Multipart form:
-
-- `file` — image (required)
-- `model` — one of: `u2net`, `u2netp`, `isnet-general-use`, `birefnet-general`, `silueta` (optional, default `u2net`)
-- `alpha_matting` — `true` / `false` (optional)
-
-Response: `image/png` with transparent background.
-
-## Connect to the main app
-
-After this Space is live, set on Vercel:
+This Space exposes a Gradio API. After deploy, set on Vercel:
 
 ```
 VITE_HF_SPACE_URL=https://YOUR_USERNAME-bg-remover-models.hf.space
 ```
 
-Then redeploy the frontend.
+The frontend calls the Gradio predict endpoint.
 
-## Deploy note
+## Deploy
 
-This folder is self-contained. When creating the Space:
-
-1. New Space → **Docker** SDK
-2. Upload / push **only** the files from this folder to the **root** of the Space repo:
+1. Create a new Space → **Gradio** (not Docker).
+2. If free account: choose **ZeroGPU** when available (up to 2 Spaces).
+3. Put these files at the **Space root**:
    - `README.md` (this file)
-   - `Dockerfile`
    - `app.py`
    - `requirements.txt`
+4. Or sync from GitHub with the workflow in `.github/workflows/sync-hf-space.yml`.

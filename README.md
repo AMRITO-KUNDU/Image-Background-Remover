@@ -2,54 +2,59 @@
 
 | Mode | Platform | Cost |
 |------|----------|------|
-| **Browser (Fast & Free)** | User device | Free |
+| **Browser (Fast & Free)** | User device | Free forever |
 | **remove.bg API** | Vercel Serverless | Free tier + API key |
-| **U2-Net / ISNet / BiRefNet** | Hugging Face Spaces | Free (HF quotas) |
+| **U2-Net / ISNet / BiRefNet** | Hugging Face **Gradio** Space | Free if ZeroGPU allowed (else needs PRO) |
+
+## Why Gradio (not Docker)?
+
+As of 2026, **Docker Spaces require a paid plan**.  
+**Static** is free but cannot run Python models.  
+**Gradio** on **ZeroGPU** can still be free for eligible personal accounts (up to 2 Spaces).
 
 ## Structure
 
 ```
-Image-Background-Remover/
-├── frontend/                    ← Vercel Root Directory = frontend
-│   ├── api/
-│   │   └── remove-background.js → remove.bg proxy
-│   ├── src/
-│   ├── package.json
-│   └── vercel.json
-├── hf-space/                    ← Hugging Face Spaces only
-│   ├── README.md
-│   ├── Dockerfile
+├── frontend/                 ← Vercel Root Directory = frontend
+│   ├── api/remove-background.js
+│   └── src/
+├── hf-space/                 ← Gradio Space (not Docker)
+│   ├── README.md             (sdk: gradio)
 │   ├── app.py
 │   └── requirements.txt
-├── package.json
-└── README.md
+├── .github/workflows/
+│   └── sync-hf-space.yml     ← push hf-space/ → HF on every commit
+└── vercel.json
 ```
 
-## Vercel setup (important)
+## Vercel
 
-1. **Root Directory** = `frontend`  ✅ (you already set this)
-2. Environment variables:
-   - `REMOVE_BG_API_KEY` = your remove.bg key
-   - `VITE_HF_SPACE_URL` = `https://YOUR_USERNAME-xxx.hf.space`
-3. Redeploy
+- **Root Directory** = `frontend`
+- Env:
+  - `REMOVE_BG_API_KEY`
+  - `VITE_HF_SPACE_URL` = `https://USERNAME-SPACE.hf.space`
 
-Install/build run inside `frontend/`, so the API lives at `frontend/api/`.
+## Hugging Face Space (manual or Actions)
 
-## Hugging Face Space
+### Option A — Manual (simplest)
 
-Do **not** point the Space at the whole repo.
+1. Create Space → SDK **Gradio** (try ZeroGPU if free account shows it).
+2. Upload files from `hf-space/` to the Space root.
+3. Copy Space URL → Vercel env `VITE_HF_SPACE_URL`.
 
-Create a new **Docker** Space and put **only** these at the Space root:
+### Option B — Auto-sync from GitHub
 
-- `hf-space/README.md`
-- `hf-space/Dockerfile`
-- `hf-space/app.py`
-- `hf-space/requirements.txt`
+1. Create empty Gradio Space on HF.
+2. GitHub repo → Settings → Secrets → `HF_TOKEN` (write token from https://huggingface.co/settings/tokens).
+3. Settings → Variables:
+   - `HF_USERNAME` = your HF username  
+   - `HF_SPACE_NAME` = your Space name  
+4. Push to `main` (or run workflow manually). The action uploads `hf-space/` to the Space.
 
-## Local
+There is **no** built-in one-click GitHub link for free Spaces; GitHub Actions + token is the standard way.
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+## If HF free tier blocks you
+
+- Rely on **Browser** mode (already unlimited/free).
+- Use **remove.bg** for highest quality cloud.
+- Or upgrade HF PRO (~$9/mo) for Docker/Gradio CPU Spaces.
