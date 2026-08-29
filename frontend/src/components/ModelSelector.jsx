@@ -1,6 +1,12 @@
 import './ModelSelector.css'
 
-export default function ModelSelector({ models, selected, onSelect, onOpenMarketplace }) {
+function badgeClass(badge, id) {
+  if (badge === 'Cloud' || id === 'remove.bg') return 'cloud'
+  if (badge === 'Heavy' || id === 'birefnet-general') return 'heavy'
+  return 'local'
+}
+
+export default function ModelSelector({ models, selected, onSelect }) {
   return (
     <div className="model-list">
       {models.map((model) => {
@@ -13,46 +19,25 @@ export default function ModelSelector({ models, selected, onSelect, onOpenMarket
             className={`model-row ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
             onClick={() => !isDisabled && onSelect(model.id)}
             disabled={isDisabled}
-            title={isDisabled ? model.disabledReason : model.description}
+            title={isDisabled ? (model.disabledReason || model.description) : model.description}
             type="button"
           >
-            {/* Selection indicator */}
             <span className={`radio-dot ${isSelected ? 'on' : ''}`} />
-
-            {/* Icon */}
             <span className="model-icon material-icons-round">
-              {model.icon || (model.id === 'remove.bg' ? 'cloud' : 'memory')}
+              {model.icon || (model.id === 'remove.bg' ? 'cloud' : model.id === 'browser' ? 'devices' : 'memory')}
             </span>
-
-            {/* Text */}
             <span className="model-text">
               <span className="model-name">{model.name}</span>
               <span className="model-desc">
-                {isDisabled ? model.disabledReason : model.description}
+                {isDisabled ? (model.disabledReason || model.description) : model.description}
               </span>
             </span>
-
-            {/* Badge */}
-            <span className={`badge badge-${model.id === 'remove.bg' ? 'cloud' : 'local'}`}>
+            <span className={`badge badge-${badgeClass(model.badge, model.id)}`}>
               {model.badge}
             </span>
           </button>
         )
       })}
-
-      {/* Marketplace link row */}
-      <button
-        className="model-row marketplace-row"
-        onClick={onOpenMarketplace}
-        type="button"
-      >
-        <span className="material-icons-round marketplace-icon">storefront</span>
-        <span className="model-text">
-          <span className="model-name">More models…</span>
-          <span className="model-desc">ISNet, BiRefNet, MODNet &amp; others</span>
-        </span>
-        <span className="material-icons-round chevron-icon">chevron_right</span>
-      </button>
     </div>
   )
 }
