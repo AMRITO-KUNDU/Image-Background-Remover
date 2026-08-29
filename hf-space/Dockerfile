@@ -17,4 +17,5 @@ ENV PORT=7860
 
 EXPOSE 7860
 
+# Must listen on 0.0.0.0 — required by Hugging Face Spaces
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]

@@ -6,28 +6,50 @@ colorTo: indigo
 sdk: docker
 app_port: 7860
 pinned: false
+license: mit
+short_description: U2-Net, ISNet and BiRefNet background removal API
 ---
 
-# BG Remover — U2-Net + Heavy Models
+# BG Remover Models
 
-Runs **U2-Net**, **ISNet**, **BiRefNet** and other rembg models.
+FastAPI service for background removal using **U2-Net**, **ISNet**, **BiRefNet** and related rembg models.
 
-## Endpoints
+## API
 
-- `GET /api/health`
-- `GET /api/models`
-- `POST /api/remove-background`  
-  multipart: `file`, `model` (optional), `alpha_matting` (optional) → PNG
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Service info |
+| GET | `/api/health` | Health check |
+| GET | `/api/models` | List available models |
+| POST | `/api/remove-background` | Remove background |
 
-## Connect to frontend
+### POST `/api/remove-background`
 
-After the Space is live, set on Vercel:
+Multipart form:
+
+- `file` — image (required)
+- `model` — one of: `u2net`, `u2netp`, `isnet-general-use`, `birefnet-general`, `silueta` (optional, default `u2net`)
+- `alpha_matting` — `true` / `false` (optional)
+
+Response: `image/png` with transparent background.
+
+## Connect to the main app
+
+After this Space is live, set on Vercel:
 
 ```
 VITE_HF_SPACE_URL=https://YOUR_USERNAME-bg-remover-models.hf.space
 ```
 
-## Auto-deploy
+Then redeploy the frontend.
 
-Connect this repo (or the `hf-space/` folder) to the Space.  
-Pushes that change `hf-space/` will rebuild automatically.
+## Deploy note
+
+This folder is self-contained. When creating the Space:
+
+1. New Space → **Docker** SDK
+2. Upload / push **only** the files from this folder to the **root** of the Space repo:
+   - `README.md` (this file)
+   - `Dockerfile`
+   - `app.py`
+   - `requirements.txt`

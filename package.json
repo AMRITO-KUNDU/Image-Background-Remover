@@ -2,11 +2,12 @@
   "name": "image-background-remover",
   "private": true,
   "version": "2.0.0",
+  "type": "module",
   "description": "Hybrid background remover — Browser + remove.bg (Vercel) + HF Spaces",
   "scripts": {
     "dev": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "install:frontend": "cd frontend && npm install"
+    "install:all": "npm install && cd frontend && npm install"
   },
   "dependencies": {
     "formidable": "^3.5.2"
