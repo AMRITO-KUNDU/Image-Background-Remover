@@ -2,3 +2,4 @@ huggingface_hub>=0.25.0,<1.0
 rembg==2.0.59
 pillow==10.4.0
 onnxruntime==1.19.2
+spaces
