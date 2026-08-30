@@ -3,3 +3,4 @@ rembg==2.0.59
 pillow==10.4.0
 onnxruntime==1.19.2
 spaces
+gradio>=5.0.0,<6.0
