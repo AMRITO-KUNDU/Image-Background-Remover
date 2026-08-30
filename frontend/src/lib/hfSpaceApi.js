@@ -6,9 +6,8 @@
  *
  * Optional: VITE_HF_TOKEN  (gives higher ZeroGPU quota)
  *
- * Uses modern Gradio queue API:
- *   POST /gradio_api/call/remove  → { event_id }
- *   GET  /gradio_api/call/remove/{event_id}  → SSE stream
+ * Uses the generated Gradio REST endpoint exposed by this Space:
+ *   POST /run/remove → { output: FileData }
  */
 
 const HF_SPACE_URL = (import.meta.env.VITE_HF_SPACE_URL || '').replace(/\/$/, '')
@@ -207,41 +206,38 @@ export async function removeBackgroundHF(
 
   const dataUrl = await fileToDataUrl(imageFile)
 
-  // Gradio 5 accepts a plain data-URL string for Image components.
-  // Sending FileData is also fine; data-URL is simpler and reliable.
+  // The live Space schema exposes /run/remove and expects a named ImageData
+  // object. A data URL in the `url` field avoids a separate upload request.
   const body = {
-    data: [dataUrl, model, Boolean(alphaMatting)],
+    image: {
+      url: dataUrl,
+      orig_name: imageFile.name || 'image.png',
+      mime_type: imageFile.type || 'image/png',
+      meta: { _type: 'gradio.FileData' },
+    },
+    model,
+    alpha_matting: Boolean(alphaMatting),
   }
 
-  // 1) Submit job
-  const submitRes = await fetch(`${HF_SPACE_URL}/gradio_api/call/remove`, {
+  const response = await fetch(`${HF_SPACE_URL}/run/remove`, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(body),
   })
 
-  if (!submitRes.ok) {
-    const t = await submitRes.text().catch(() => '')
+  if (!response.ok) {
+    const t = await response.text().catch(() => '')
     // Helpful messages for common ZeroGPU failures
-    if (submitRes.status === 429 || /quota|rate/i.test(t)) {
+    if (response.status === 429 || /quota|rate/i.test(t)) {
       throw new Error(
         'HF ZeroGPU quota exceeded. Wait a bit or add VITE_HF_TOKEN (free account gets more quota when authenticated).'
       )
     }
-    throw new Error(`HF Space submit failed: ${submitRes.status} ${t.slice(0, 250)}`)
+    throw new Error(`HF Space request failed: ${response.status} ${t.slice(0, 250)}`)
   }
 
-  const submitJson = await submitRes.json()
-  const eventId = submitJson.event_id
-  if (!eventId) throw new Error('HF Space did not return event_id')
-
-  // 2) Stream result (waits for event: complete)
-  const dataArray = await readSseResult(
-    `${HF_SPACE_URL}/gradio_api/call/remove/${eventId}`
-  )
-
-  // dataArray is usually [ FileData | null ]
-  const output = Array.isArray(dataArray) ? dataArray[0] : dataArray
+  const result = await response.json()
+  const output = result?.output
   if (!output) throw new Error('HF Space returned no image')
 
   return await outputToBlob(output)
