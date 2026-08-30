@@ -3,6 +3,7 @@ Gradio Space — background removal API for the Vercel frontend.
 ZeroGPU compatible. Exposed as /gradio_api/call/remove
 """
 
+import base64
 import io
 import gradio as gr
 import spaces
@@ -26,31 +27,28 @@ def get_session(model_name: str):
     return _sessions[model_name]
 
 
-def _to_pil(image) -> Image.Image | None:
-    """Accept PIL, numpy, filepath, or Gradio FileData-like dict / data-URL."""
+def _to_pil(image) -> Image.Image:
+    """Convert Gradio's image value into RGB PIL and preserve useful errors."""
     if image is None:
-        return None
+        raise ValueError("No image was received by the Hugging Face Space")
     if isinstance(image, Image.Image):
         return image.convert("RGB")
     if isinstance(image, dict):
-        # Gradio FileData
+        # Gradio FileData. In API calls, the image is normally already converted
+        # to PIL by gr.Image(type="pil"), but this also handles raw FileData.
         path = image.get("path") or image.get("url") or image.get("name")
         if path and isinstance(path, str) and path.startswith("data:"):
-            import base64
-            header, b64 = path.split(",", 1)
+            _, b64 = path.split(",", 1)
             return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
         if path:
             return Image.open(path).convert("RGB")
-        return None
+        raise ValueError("Image FileData did not contain a readable path or URL")
     if isinstance(image, str) and image.startswith("data:"):
-        import base64
-        header, b64 = image.split(",", 1)
+        _, b64 = image.split(",", 1)
         return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
-    # numpy / filepath fallback
-    try:
-        return Image.open(image).convert("RGB") if isinstance(image, str) else Image.fromarray(image).convert("RGB")
-    except Exception:
-        return None
+    if isinstance(image, str):
+        return Image.open(image).convert("RGB")
+    return Image.fromarray(image).convert("RGB")
 
 
 @spaces.GPU(duration=120)  # BiRefNet can be slow; 120s budget
@@ -59,8 +57,6 @@ def remove_bg(image, model: str = "u2net", alpha_matting: bool = False):
     Core GPU function. Always returns a PIL RGBA image (or None).
     """
     pil = _to_pil(image)
-    if pil is None:
-        return None
 
     model_name = model if model in MODELS else "u2net"
     session = get_session(model_name)

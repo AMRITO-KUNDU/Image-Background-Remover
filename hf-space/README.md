@@ -14,6 +14,7 @@ short_description: U2-Net / ISNet / BiRefNet background removal
 # BG Remover Models (Gradio)
 
 Free-tier friendly **Gradio** Space (use **ZeroGPU** if your free account allows it).
+ZeroGPU has daily usage quotas and queue limits; it is not an unlimited public API.
 
 ## Models
 
@@ -27,7 +28,8 @@ This Space exposes a Gradio API. After deploy, set on Vercel:
 VITE_HF_SPACE_URL=https://YOUR_USERNAME-bg-remover-models.hf.space
 ```
 
-The frontend calls the Gradio predict endpoint.
+The frontend calls the Gradio queue endpoint. Verify the deployed endpoint and
+input/output schema at `https://YOUR_SPACE.hf.space/gradio_api/openapi.json`.
 
 ## Deploy
 
