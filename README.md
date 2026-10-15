@@ -28,6 +28,12 @@ One clean interface. Three ways to run. No lock-in.
 
 > **Built for real-world images** — optional alpha matting recovers fine hair and fur, and the strongest open-source model (BiRefNet) is one click away when edges matter.
 
+## Preview
+
+<div align="center">
+  <img src="assets/preview.png" alt="LuminaBG — model selector, upload zone, and model comparison strip" width="820" />
+</div>
+
 ---
 
 ## Why it's different
