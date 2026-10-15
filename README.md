@@ -1,7 +1,6 @@
 <div align="center">
-  <img src="assets/banner.svg" alt="LuminaBG — Premium AI Background Remover" width="100%" />
 
-  <br/>
+  <h1>LuminaBG</h1>
 
   <b>Remove backgrounds with the right model for the job</b><br/>
   instant and private in your browser, sharpest in the cloud, most powerful on GPU.
