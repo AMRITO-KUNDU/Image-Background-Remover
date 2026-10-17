@@ -18,7 +18,44 @@ MODELS = {
     "silueta": "Silueta (portraits)",
 }
 
+# Per-model GPU duration, in seconds.
+#
+# ZeroGPU compares the *declared* duration against the visitor's remaining
+# daily quota BEFORE the call runs (not the actual run time). An oversized
+# duration therefore makes the Space fail early for a visitor as soon as their
+# remaining quota drops below it, and it also ranks lower in the node-level
+# queue. Keep these close to the realistic worst case per model rather than one
+# large value for every model.
+MODEL_DURATION = {
+    "u2net": 20,
+    "u2netp": 15,
+    "isnet-general-use": 30,
+    "birefnet-general": 60,
+    "silueta": 20,
+}
+DEFAULT_DURATION = 30
+
+
+def estimate_duration(image, model="u2net", alpha_matting=False):
+    """Dynamic @spaces.GPU duration estimator (receives the same args as remove_bg)."""
+    return MODEL_DURATION.get(model, DEFAULT_DURATION)
+
+
+# Sessions are loaded eagerly at module scope so the first request for each
+# model does not pay the download/init cost inside the GPU-decorated call.
+# Failures are non-fatal: get_session() falls back to lazy loading.
 _sessions = {}
+
+
+def _preload_sessions():
+    for name in MODELS:
+        try:
+            _sessions[name] = new_session(name)
+        except Exception as exc:  # noqa: BLE001 - best effort only
+            print(f"[warn] could not preload '{name}': {exc}")
+
+
+_preload_sessions()
 
 
 def get_session(model_name: str):
@@ -51,7 +88,7 @@ def _to_pil(image) -> Image.Image:
     return Image.fromarray(image).convert("RGB")
 
 
-@spaces.GPU(duration=120)  # BiRefNet can be slow; 120s budget
+@spaces.GPU(duration=estimate_duration)
 def remove_bg(image, model: str = "u2net", alpha_matting: bool = False):
     """
     Core GPU function. Always returns a PIL RGBA image (or None).
