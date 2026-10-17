@@ -301,6 +301,15 @@
   color: #fbbf24;
 }
 
+.badge-experimental {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+.dark .badge-experimental {
+  background: rgba(124, 58, 237, 0.18);
+  color: #a78bfa;
+}
+
 /* Bar stats */
 .model-bars { display: flex; flex-direction: column; gap: 7px; }
 
