@@ -2,6 +2,7 @@ import './ModelSelector.css'
 
 function badgeClass(badge, id) {
   if (badge === 'Cloud' || id === 'remove.bg') return 'cloud'
+  if (badge === 'Experimental') return 'experimental'
   if (badge === 'Heavy' || id === 'birefnet-general') return 'heavy'
   return 'local'
 }
