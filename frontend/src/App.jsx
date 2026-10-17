@@ -197,7 +197,13 @@ export default function App() {
                 const s = MODEL_STATS[m.id]
                 if (!s) return null
                 const badgeClass =
-                  m.badge === 'Cloud' ? 'cloud' : m.badge === 'Heavy' ? 'heavy' : 'local'
+                  m.badge === 'Cloud'
+                    ? 'cloud'
+                    : m.badge === 'Experimental'
+                      ? 'experimental'
+                      : m.badge === 'Heavy'
+                        ? 'heavy'
+                        : 'local'
                 return (
                   <div key={m.id} className="model-card">
                     <div className="model-card-header">

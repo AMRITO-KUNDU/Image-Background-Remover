@@ -18,35 +18,35 @@ export const HF_MODELS = {
   u2net: {
     id: 'u2net',
     name: 'U2-Net',
-    badge: 'HF',
+    badge: 'Experimental',
     description: 'Fast general model on Hugging Face',
     icon: 'memory',
   },
   u2netp: {
     id: 'u2netp',
     name: 'U2-Net-P',
-    badge: 'HF',
+    badge: 'Experimental',
     description: 'Lightweight & very fast',
     icon: 'memory',
   },
   'isnet-general-use': {
     id: 'isnet-general-use',
     name: 'ISNet',
-    badge: 'HF',
+    badge: 'Experimental',
     description: 'Higher quality general model',
     icon: 'auto_awesome',
   },
   'birefnet-general': {
     id: 'birefnet-general',
     name: 'BiRefNet',
-    badge: 'Heavy',
+    badge: 'Experimental',
     description: 'Best open-source edges (hair, fur)',
     icon: 'auto_awesome',
   },
   silueta: {
     id: 'silueta',
     name: 'Silueta',
-    badge: 'HF',
+    badge: 'Experimental',
     description: 'Portrait / human silhouette focused',
     icon: 'person',
   },
@@ -81,6 +81,41 @@ async function fileToDataUrl(file) {
   const b64 = btoa(binary)
   const mime = file.type || 'image/png'
   return `data:${mime};base64,${b64}`
+}
+
+/**
+ * Normalise a Gradio error payload into something actionable.
+ *
+ * ZeroGPU rejects a call *before* it runs when the visitor's remaining daily
+ * quota is below the Space's declared duration. Depending on the Gradio /
+ * spaces version that rejection can arrive with an empty (null) error payload,
+ * which the old code rendered as the literal string "HF Space error: null".
+ */
+function describeHfError(payload) {
+  let msg = ''
+  if (typeof payload === 'string') {
+    msg = payload
+  } else if (payload && typeof payload === 'object') {
+    msg = payload.error || payload.message || JSON.stringify(payload)
+  }
+
+  if (/quota|rate ?limit|too many|exceeded|busy|try again/i.test(msg)) {
+    return (
+      'Hugging Face daily GPU quota reached for this Space. It resets 24h ' +
+      'after first use \u2014 try again later, or sign in to Hugging Face for ' +
+      'a larger quota.' +
+      (msg ? ` (Space said: ${msg})` : '')
+    )
+  }
+
+  if (!msg) {
+    return (
+      'Hugging Face Space returned an empty error \u2014 usually a ZeroGPU ' +
+      'quota or queue rejection. Please try again in a little while.'
+    )
+  }
+
+  return `HF Space error: ${msg}`
 }
 
 /**
@@ -127,11 +162,7 @@ async function readSseResult(url) {
           return payload
         }
         if (currentEvent === 'error') {
-          const msg =
-            typeof payload === 'string'
-              ? payload
-              : payload?.error || payload?.message || JSON.stringify(payload)
-          throw new Error(`HF Space error: ${msg}`)
+          throw new Error(describeHfError(payload))
         }
         // generating / heartbeat / status → ignore
       }
