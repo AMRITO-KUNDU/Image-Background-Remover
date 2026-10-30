@@ -20,48 +20,61 @@
 
 ---
 
-## What is LuminaBG?
+## 🎯 The problem
 
-**LuminaBG is a hybrid background remover.** Most tools lock you into one engine — a slow paid API, or a weak local model. LuminaBG ships **seven**, spanning a zero-upload browser engine, a best-in-class cloud API, and state-of-the-art open-source models running on GPU. You pick the model per image, see speed/quality up front, compare the result side-by-side, and export a transparent PNG — or drop the cutout onto any background colour.
+Background removal looks like a solved problem until you actually need it.
+
+The best-quality model is slow. The fastest one mangles hair. Most tools quietly upload your image to somebody else's server to do the work — even when a quick pass in the browser would have been enough. And almost every tool makes the choice **for** you, then hides it behind a single "Remove background" button.
+
+So you inherit whichever trade-off the developer picked: privacy, speed, or quality. Never all three.
+
+**LuminaBG refuses to make that choice for you.**
+
+---
+
+## ✨ The solution
+
+### 1️⃣ **Pick the engine, per image**
+
+Seven engines sit behind one interface. A model selector shows the speed and quality of each, so you choose with your eyes open — not by guessing.
+
+### 2️⃣ **Watch it work, side by side**
+
+A draggable before/after slider plus Result and Original tabs. No reloading, no downloading something just to find out it was wrong.
+
+### 3️⃣ **Export exactly what you need**
+
+A transparent PNG, or the cutout composited onto eight solid colours — rendered on a canvas at full resolution.
 
 One clean interface. Three ways to run. No lock-in.
 
-> **Built for real-world images** — optional alpha matting recovers fine hair and fur, and the strongest open-source model (BiRefNet) is one click away when edges matter.
+---
 
-## Preview
+## 🌟 Key features
 
-<div align="center">
-  <img src="assets/preview.png" alt="LuminaBG — model selector, upload zone, and model comparison strip" width="820" />
-</div>
+### 🔒 **Privacy where it matters**
+
+The **Browser engine** runs an ONNX model entirely on your device. Your image never leaves the tab. Nothing is uploaded, nothing is stored.
+
+### 🧩 **No vendor lock-in**
+
+Mix a free local model, a paid cloud API, and open-source GPU models in the same session. Switch mid-project without switching tools.
+
+### 🎯 **Built for hard edges**
+
+Optional **alpha matting** (foreground `240` / background `10` / erode `10`) recovers hair, fur and fine detail — the exact thing most background removers smear into a halo.
+
+### 🖼️ **Ship-ready output**
+
+Transparent PNG, or composite onto white, black, gray, blue, green, red, yellow or purple. Rendered at full resolution on a canvas, not a downscaled preview.
+
+### ⚡ **Fast by default**
+
+Drag-and-drop upload for JPEG, PNG, WebP and GIF up to 20 MB. Dark/light theme that remembers your choice. One-click download.
 
 ---
 
-## Why it's different
-
-| | |
-|---|---|
-| 🔒 **Zero-upload privacy** | The Browser engine runs fully on your device via `@imgly/background-removal`. Your image never leaves the tab. |
-| 🧩 **No vendor lock-in** | Mix a free local model, a paid cloud API, and open-source GPU models in the same session. |
-| 🎯 **Built for hard edges** | Optional alpha matting (fg `240` / bg `10` / erode `10`) for hair, fur, and fine detail. |
-| 🖼️ **Ship-ready output** | Transparent PNG, or composite onto 8 solid colours — rendered on a canvas at full resolution. |
-| 💸 **Free by design** | Browser mode is unlimited and free; HF models run on ZeroGPU; `remove.bg` is entirely optional. |
-
----
-
-## Features
-
-- **Drag-and-drop upload** — JPEG, PNG, WebP, GIF up to 20 MB.
-- **7 AI engines** — switch models per image from a live selector with speed & quality bars.
-- **Before / after compare** — draggable slider plus Result and Original tabs.
-- **Background presets** — transparent, plus white, black, gray, blue, green, red, yellow, purple.
-- **Alpha matting toggle** — finer edges for hair and fur on supported models.
-- **Dark / light theme** — remembers your choice across visits.
-- **One-click PNG download** — transparent or composited, straight from the browser.
-- **Privacy-first** — nothing is stored; the client-side engine uploads nothing at all.
-
----
-
-## The model lineup
+## 🧠 The model lineup
 
 | Model | Engine | Runs on | Speed | Quality |
 |---|---|:---|:---:|:---:|
@@ -73,27 +86,27 @@ One clean interface. Three ways to run. No lock-in.
 | **BiRefNet** | `rembg` | Hugging Face ZeroGPU | 50 | 96 |
 | **Silueta** | `rembg` | Hugging Face ZeroGPU | 88 | 75 |
 
-*Speed and quality are LuminaBG's own in-app scores — tuned for at-a-glance comparison, not benchmarks.*
+> Speed and quality are LuminaBG's **own in-app scores**, tuned for at-a-glance comparison — not published benchmarks. They describe relative feel, not absolute accuracy.
 
 ---
 
-## How it works
+## 🏗️ How it works
 
 ```
                  ┌────────────────────────────────────────────┐
-                 │   Browser — React 19 + Vite (Vercel)         │
-                 │   Model selector · compare slider · export   │
-                 └───────────────┬──────────────────────────────┘
+                 │   Browser — React 19 + Vite (Vercel)       │
+                 │   Model selector · compare slider · export │
+                 └───────────────┬────────────────────────────┘
                                  │  pick a model
         ┌────────────────────────┼────────────────────────────┐
         ▼                        ▼                            ▼
 ┌────────────────┐    ┌────────────────────┐    ┌────────────────────────────┐
-│ Browser engine │    │ Cloud engine        │    │ GPU engine                  │
-│ @imgly/        │    │ /api/remove-        │    │ Gradio Space (ZeroGPU)      │
-│ background-    │    │ background          │    │ /gradio_api/call/remove     │
-│ removal        │    │ (Vercel serverless) │    │ rembg + onnxruntime         │
-│ on-device,     │    │ → remove.bg         │    │ u2net · u2netp · isnet ·    │
-│ no upload      │    │ needs API key       │    │ birefnet · silueta          │
+│ Browser engine │    │ Cloud engine       │    │ GPU engine                 │
+│ @imgly/        │    │ /api/remove-       │    │ Gradio Space (ZeroGPU)     │
+│ background-    │    │ background         │    │ /gradio_api/call/remove    │
+│ removal        │    │ (Vercel serverless)│    │ rembg + onnxruntime        │
+│ on-device,     │    │ → remove.bg        │    │ u2net · u2netp · isnet ·   │
+│ no upload      │    │ needs API key      │    │ birefnet · silueta         │
 └────────────────┘    └────────────────────┘    └────────────────────────────┘
 ```
 
@@ -103,7 +116,19 @@ One clean interface. Three ways to run. No lock-in.
 
 ---
 
-## Quick start
+## ⚖️ LuminaBG vs the alternatives
+
+| | LuminaBG | Typical "remove bg" site | One-model local tool |
+|---|:---:|:---:|:---:|
+| Choose the model per image | ✅ | ❌ | ❌ |
+| Works with zero upload | ✅ | ❌ | ✅ |
+| Reaches cloud quality when needed | ✅ | ✅ | ❌ |
+| Free to run | ✅ | ⚠️ paid/watermarked | ✅ |
+| See speed vs quality before choosing | ✅ | ❌ | ❌ |
+
+---
+
+## 🚀 Quick start
 
 **Requirements:** Node 18+ and npm.
 
@@ -123,11 +148,11 @@ cp .env.example .env
 
 ---
 
-## Environment variables
+## 🔐 Environment variables
 
 | Variable | Where | Required | Purpose |
 |---|---|:---:|---|
-| `VITE_HF_SPACE_URL` | Frontend | optional | Base URL of your Gradio Space, e.g. `https://your-space.hf.space` (no trailing slash). Unlocks the U2-Net / ISNet / BiRefNet / Silueta models. |
+| `VITE_HF_SPACE_URL` | Frontend | optional | Base URL of your Gradio Space, e.g. `https://your-space.hf.space` (no trailing slash). Unlocks U2-Net / ISNet / BiRefNet / Silueta. |
 | `VITE_HF_TOKEN` | Frontend | optional | Hugging Face token for higher ZeroGPU quota. |
 | `REMOVE_BG_API_KEY` | Vercel | optional | Enables the remove.bg cloud engine. |
 
@@ -135,17 +160,17 @@ cp .env.example .env
 
 ---
 
-## Deploy
+## ☁️ Deploy
 
 **Frontend (Vercel).** Set the project **Root Directory to `frontend`**. Add the env vars above, then deploy. The serverless remove.bg proxy lives at `api/remove-background.js`.
 
-**Models (Hugging Face Space).** Create a Space with the **Gradio** SDK (ZeroGPU on a free account if available) and place `hf-space/app.py`, `hf-space/requirements.txt`, and `hf-space/README.md` at the Space root. Copy the Space URL into `VITE_HF_SPACE_URL`.
+**Models (Hugging Face Space).** Create a Space with the **Gradio** SDK (ZeroGPU on a free account if available) and place `hf-space/app.py`, `hf-space/requirements.txt` and `hf-space/README.md` at the Space root. Copy the Space URL into `VITE_HF_SPACE_URL`.
 
-**Auto-sync (optional).** The workflow at `.github/workflows/sync-hf-space.yml` pushes `hf-space/` to your Space on every commit. Set the repo secret `HF_TOKEN` and the variables `HF_USERNAME` / `HF_SPACE_NAME`.
+**Auto-sync (optional).** `.github/workflows/sync-hf-space.yml` pushes `hf-space/` to your Space on every commit. Set the repo secret `HF_TOKEN` and the variables `HF_USERNAME` / `HF_SPACE_NAME`.
 
 ---
 
-## Tech stack
+## 🛠️ Tech stack
 
 **Frontend** — React 19 · Vite 6 · `@imgly/background-removal` · Material Icons Round · Inter / Outfit
 **Serverless** — Node.js · `formidable` · Vercel Functions
@@ -154,7 +179,7 @@ cp .env.example .env
 
 ---
 
-## Project structure
+## 📁 Project structure
 
 ```
 Image-Background-Remover/
@@ -174,20 +199,48 @@ Image-Background-Remover/
 
 ---
 
-## Roadmap
+## 🗺️ Roadmap
+
+**Working today**
+
+- [x] Seven engines across browser, cloud and GPU
+- [x] Per-image model selector with speed/quality bars
+- [x] Before/after compare slider
+- [x] Alpha matting for hair and fur
+- [x] Transparent PNG and 8 background presets
+- [x] Dark/light theme
+
+**Not built yet**
 
 - [ ] Batch / multi-image processing
 - [ ] Additional export formats (WebP, JPEG with quality control)
-- [ ] Wire the model marketplace to a live model catalogue
+- [ ] Wiring the model marketplace to a live catalogue
 - [ ] Per-model presets and saved defaults
 
 ---
 
-## Credits
+## 💭 FAQ
+
+**Do I need an API key to use it?**
+No. The Browser engine is free and unlimited. Keys only unlock the cloud and GPU engines.
+
+**Does my image get uploaded?**
+Only if you pick a cloud or GPU engine. The Browser engine runs entirely on your device.
+
+**Why seven models instead of one?**
+Because "best" depends on the image. A product shot wants BiRefNet; a quick draft wants the browser engine; a batch job might want remove.bg. LuminaBG lets the image decide.
+
+**Is it really free?**
+The app is MIT-licensed and self-hostable. The browser engine costs nothing to run. remove.bg is paid and entirely optional.
+
+---
+
+## 🙏 Credits
 
 Built by **[Amrito Kundu](https://github.com/AMRITO-KUNDU)**.
+
 Background removal powered by **[rembg](https://github.com/danielgatis/rembg)**, **[@imgly/background-removal](https://github.com/imgly/background-removal-js)**, **[remove.bg](https://www.remove.bg/)**, and **Hugging Face Gradio / ZeroGPU**.
 
-## License
+## 📄 License
 
 Released under the **MIT License** — see [LICENSE](LICENSE).
