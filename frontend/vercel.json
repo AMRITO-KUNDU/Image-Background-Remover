@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!api/|robots\\.txt$|sitemap\\.xml$|how-to-remove-image-background\\.html$|privacy\\.html$|content-pages\\.css$).*)", "destination": "/index.html" }
   ],
   "functions": {
     "api/remove-background.js": {

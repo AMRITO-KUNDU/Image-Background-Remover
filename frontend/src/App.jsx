@@ -114,9 +114,9 @@ export default function App() {
 
       <main className="main">
         <div className="hero">
-          <h1 className="hero-title">Remove image backgrounds</h1>
+          <h1 className="hero-title">Free AI background remover</h1>
           <p className="hero-sub">
-            Browser · remove.bg · U2-Net &amp; BiRefNet on Hugging Face — free &amp; unlimited options.
+            Remove an image background with an engine you choose: process it on your device, or use a cloud model. Compare the cutout and export a transparent PNG.
           </p>
         </div>
 
@@ -230,6 +230,52 @@ export default function App() {
               })}
           </div>
         </div>
+
+        <section className="info-section" id="how-it-works" aria-labelledby="how-it-works-title">
+          <p className="label-sm">A simple three-step workflow</p>
+          <h2 className="info-title" id="how-it-works-title">From photo to clean cutout</h2>
+          <ol className="steps-list">
+            <li className="step-card">
+              <span className="step-number">01</span>
+              <h3>Upload your image</h3>
+              <p>Choose a JPEG, PNG, WebP, or GIF file up to 20 MB, or drag it into the upload area.</p>
+            </li>
+            <li className="step-card">
+              <span className="step-number">02</span>
+              <h3>Pick an engine</h3>
+              <p>Use Browser for on-device processing, or select a configured cloud model when you want to compare its result.</p>
+            </li>
+            <li className="step-card">
+              <span className="step-number">03</span>
+              <h3>Compare and export</h3>
+              <p>Review the original and cutout, preview a background color, and download the result as a PNG.</p>
+            </li>
+          </ol>
+          <p className="info-link"><a href="/how-to-remove-image-background.html">Read the full background-removal guide <span aria-hidden="true">&rarr;</span></a></p>
+        </section>
+
+        <section className="faq-section" id="faq" aria-labelledby="faq-title">
+          <p className="label-sm">Good to know</p>
+          <h2 className="info-title" id="faq-title">Background remover FAQs</h2>
+          <div className="faq-list">
+            <details className="faq-item">
+              <summary>Can I remove a background without uploading the image?</summary>
+              <p>The Browser engine runs on your device and does not send the original image to LuminaBG's processing endpoint. The remove.bg and Hugging Face engines send the image to the selected remote provider.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Is LuminaBG free to use?</summary>
+              <p>The Browser engine is free to run and does not need a cloud API key. Optional cloud engines can have provider-specific setup, quotas, or terms.</p>
+            </details>
+            <details className="faq-item">
+              <summary>What image files can I use?</summary>
+              <p>Upload JPEG, PNG, WebP, or GIF images up to 20 MB. The result downloads as a PNG.</p>
+            </details>
+            <details className="faq-item">
+              <summary>Where can I read more about image privacy?</summary>
+              <p>See <a href="/privacy.html">how each processing engine handles your image</a> before choosing a local or cloud option.</p>
+            </details>
+          </div>
+        </section>
       </main>
 
       <Footer />

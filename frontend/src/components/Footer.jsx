@@ -15,9 +15,14 @@ export default function Footer() {
           </a>
         </p>
 
+        <nav className="footer-links" aria-label="Help and privacy">
+          <a href="/how-to-remove-image-background.html">How to remove a background</a>
+          <a href="/privacy.html">Image processing &amp; privacy</a>
+        </nav>
+
         <p className="footer-privacy">
           <span className="material-icons-round">lock</span>
-          Images are processed privately — nothing is stored
+          <a href="/privacy.html">Choose on-device or cloud processing</a>
         </p>
       </div>
     </footer>

@@ -82,3 +82,22 @@
 
 /* Dark toggle */
 .dark-toggle { margin-left: 4px; }
+
+@media (max-width: 560px) {
+  .header-inner {
+    padding-inline: 12px;
+  }
+
+  .header-nav {
+    gap: 0;
+  }
+
+  .header-nav .nav-link {
+    padding-inline: 7px;
+    font-size: 12px;
+  }
+
+  .header-nav .nav-link--source {
+    display: none;
+  }
+}

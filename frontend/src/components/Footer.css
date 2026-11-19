@@ -31,6 +31,26 @@
   color: var(--text-primary);
 }
 
+.footer-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.footer-links a,
+.footer-privacy a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.footer-links a:hover,
+.footer-privacy a:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .footer-privacy {
   display: flex;
   align-items: center;
@@ -42,4 +62,17 @@
 .footer-privacy .material-icons-round {
   font-size: 13px;
   color: var(--success);
+}
+
+@media (max-width: 640px) {
+  .footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-block: 16px;
+  }
+
+  .footer-links {
+    gap: 4px 12px;
+    font-size: 12px;
+  }
 }

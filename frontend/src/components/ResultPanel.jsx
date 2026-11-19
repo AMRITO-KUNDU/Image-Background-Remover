@@ -163,12 +163,17 @@ export default function ResultPanel({ originalUrl, resultUrl, loading, onReset, 
               <button
                 key={p.id}
                 className={`bg-dot ${bg === p.id ? 'active' : ''} ${p.id === 'transparent' ? 'transparent-dot' : ''}`}
-                style={p.color ? { backgroundColor: p.color } : {}}
                 onClick={() => setBg(p.id)}
                 title={p.label}
                 type="button"
                 aria-label={`Background: ${p.label}`}
-              />
+              >
+                <span
+                  className="bg-dot-swatch"
+                  aria-hidden="true"
+                  style={p.color ? { backgroundColor: p.color } : undefined}
+                />
+              </button>
             ))}
           </div>
         </div>

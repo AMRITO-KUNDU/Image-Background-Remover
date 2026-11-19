@@ -367,3 +367,261 @@
   color: var(--text-primary);
   margin-top: 4px;
 }
+
+
+/* ================================================================
+   HOW-TO AND FAQ CONTENT
+   ================================================================ */
+html {
+  scroll-padding-block-start: 4.5rem;
+}
+
+#how-it-works,
+#faq {
+  scroll-margin-block-start: 4.5rem;
+}
+
+.info-section,
+.faq-section {
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+  padding-top: 32px;
+}
+
+.info-title {
+  margin: 6px 0 18px;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(22px, 1.1rem + 1vw, 30px);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.steps-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-card {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.step-number {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.step-card h3 {
+  margin: 8px 0 6px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 650;
+  text-wrap: balance;
+}
+
+.step-card p,
+.faq-item p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.info-link {
+  margin: 16px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.info-link a,
+.faq-item a {
+  color: var(--text-primary);
+  text-underline-offset: 3px;
+}
+
+.faq-list {
+  border-top: 1px solid var(--border);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-item summary {
+  min-block-size: 48px;
+  display: flex;
+  align-items: center;
+  padding: 10px 2px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-wrap: balance;
+}
+
+.faq-item p {
+  padding: 0 2px 14px;
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace > * {
+    min-width: 0;
+  }
+
+  .steps-list {
+    grid-template-columns: 1fr;
+  }
+
+  .step-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 20px 16px 48px;
+  }
+
+  .hero {
+    padding: 28px 0 24px;
+    margin-bottom: 24px;
+  }
+
+  .hero-sub {
+    max-width: 62ch;
+    font-size: 14px;
+    text-wrap: pretty;
+  }
+
+  .workspace {
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .workspace-right {
+    order: -1;
+  }
+
+  .controls-panel {
+    order: 0;
+  }
+
+  .image-panel {
+    min-height: clamp(260px, 72vw, 360px);
+  }
+
+  .upload-zone {
+    min-height: clamp(260px, 72vw, 360px);
+    padding: 24px 16px;
+  }
+
+  .image-panel .result-viewport,
+  .image-panel .single-view,
+  .image-panel .slider-root {
+    min-height: clamp(240px, 65vw, 320px);
+  }
+
+  .result-panel {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .result-tabs {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .tab-btn {
+    flex: 1;
+    justify-content: center;
+    gap: 4px;
+    padding-inline: 6px;
+    font-size: 11px;
+  }
+
+  .result-footer {
+    align-items: stretch;
+  }
+
+  .bg-picker {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .result-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .result-actions > button {
+    min-width: 0;
+    justify-content: center;
+  }
+
+  .model-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .info-section,
+  .faq-section {
+    margin-top: 32px;
+    padding-top: 24px;
+  }
+}
+
+@media (max-width: 360px) {
+  .main {
+    padding-inline: 12px;
+  }
+
+  .panel-section {
+    padding-inline: 14px;
+  }
+
+  .result-tabs .tab-btn .material-icons-round {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .btn-icon,
+  .btn-primary,
+  .btn-ghost,
+  .tab-btn,
+  .model-row,
+  .header-nav .nav-link,
+  .footer-links a,
+  .footer-privacy a {
+    min-block-size: 44px;
+  }
+
+  .header-nav .nav-link,
+  .footer-links a,
+  .footer-privacy a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .btn-icon {
+    min-inline-size: 44px;
+    min-block-size: 44px;
+  }
+}

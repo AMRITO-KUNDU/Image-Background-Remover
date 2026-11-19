@@ -14,9 +14,11 @@ export default function Header({ dark, onToggleDark }) {
 
         {/* Right nav */}
         <nav className="header-nav" aria-label="Main navigation">
+          <a className="nav-link" href="#how-it-works">How it works</a>
+          <a className="nav-link" href="#faq">FAQ</a>
           <a
-            className="nav-link"
-            href="https://github.com/danielgatis/rembg"
+            className="nav-link nav-link--source"
+            href="https://github.com/AMRITO-KUNDU/Image-Background-Remover"
             target="_blank"
             rel="noopener noreferrer"
           >

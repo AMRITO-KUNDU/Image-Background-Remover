@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index,follow" />
+    <title>How to Remove an Image Background Free | LuminaBG</title>
+    <meta name="description" content="Learn how to remove an image background with LuminaBG: upload a photo, choose an AI engine, compare the cutout, and export a transparent PNG." />
+    <link rel="canonical" href="https://image-background-remover-lake.vercel.app/how-to-remove-image-background.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="LuminaBG" />
+    <meta property="og:title" content="How to Remove an Image Background | LuminaBG" />
+    <meta property="og:description" content="A practical guide to choosing an engine, comparing the result, and exporting a transparent PNG." />
+    <meta property="og:url" content="https://image-background-remover-lake.vercel.app/how-to-remove-image-background.html" />
+    <link rel="stylesheet" href="/content-pages.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="page-header-inner">
+        <a class="brand" href="/" aria-label="LuminaBG home">LuminaBG</a>
+        <nav class="page-nav" aria-label="Main navigation">
+          <a href="/privacy.html">Image privacy</a>
+          <a class="primary-link" href="/">Open the remover</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page-main">
+      <article class="article">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a> &rsaquo; How to remove an image background
+        </nav>
+        <p class="eyebrow">LuminaBG guide</p>
+        <h1>How to remove an image background in three steps</h1>
+        <p class="lede">Make a clean cutout with a browser-based or cloud AI model. Choose the processing option that fits your photo, check the result, and download a transparent PNG.</p>
+
+        <ol class="steps">
+          <li>
+            <strong>Upload a photo</strong>
+            Choose a JPEG, PNG, WebP, or GIF image up to 20 MB. You can also drag a file into the upload area.
+          </li>
+          <li>
+            <strong>Choose how to process it</strong>
+            Start with Browser for on-device processing, or select remove.bg or an available Hugging Face model for cloud processing.
+          </li>
+          <li>
+            <strong>Compare and export</strong>
+            Review the original and cutout, adjust the comparison slider, then download the transparent PNG. You can preview it against a solid color first.
+          </li>
+        </ol>
+
+        <h2>Which background-removal engine should you choose?</h2>
+        <p><strong>Browser (Fast &amp; Free)</strong> runs its model on your device and is the option to use when you do not want to upload the original image to a processing service. It works without a cloud API key.</p>
+        <p><strong>remove.bg</strong> sends the image through LuminaBG's serverless proxy to the remove.bg API. It requires the site operator to configure an API key. <strong>Hugging Face models</strong> send the image to the configured Space and are useful when you want to compare different open-source models. Cloud availability and quotas depend on their providers.</p>
+
+        <aside class="callout">
+          <p><strong>Privacy tip:</strong> the Browser engine processes the image locally in your tab. The remove.bg and Hugging Face engines send the image to the selected remote service. Read the <a href="/privacy.html">image processing and privacy details</a> before choosing a cloud model.</p>
+        </aside>
+
+        <h2>Common questions</h2>
+        <div class="faq-list">
+          <details>
+            <summary>Can I remove a background without uploading my photo?</summary>
+            <div class="faq-answer"><p>Yes. Select the Browser engine. It processes the image on your device; the cloud engines send it to the selected provider for processing.</p></div>
+          </details>
+          <details>
+            <summary>What image formats and sizes are supported?</summary>
+            <div class="faq-answer"><p>The upload tool accepts JPEG, PNG, WebP, and GIF files up to 20 MB.</p></div>
+          </details>
+          <details>
+            <summary>What file do I download?</summary>
+            <div class="faq-answer"><p>The result downloads as a PNG. Choose a transparent background for a cutout with transparency, or preview a solid-color composite before downloading.</p></div>
+          </details>
+        </div>
+
+        <a class="page-cta" href="/">Remove a background</a>
+      </article>
+    </main>
+
+    <footer class="page-footer">
+      <div class="page-footer-inner">
+        <p>&copy; <span id="year">2026</span> LuminaBG</p>
+        <a href="/privacy.html">Image processing &amp; privacy</a>
+      </div>
+    </footer>
+  </body>
+</html>

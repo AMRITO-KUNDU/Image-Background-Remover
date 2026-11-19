@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index,follow" />
+    <title>Image Processing &amp; Privacy | LuminaBG</title>
+    <meta name="description" content="See how LuminaBG handles images: the Browser engine works on-device, while remove.bg and Hugging Face models process images through their remote services." />
+    <link rel="canonical" href="https://image-background-remover-lake.vercel.app/privacy.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="LuminaBG" />
+    <meta property="og:title" content="Image Processing &amp; Privacy | LuminaBG" />
+    <meta property="og:description" content="Choose on-device processing or a remote model with a clear understanding of where your image goes." />
+    <meta property="og:url" content="https://image-background-remover-lake.vercel.app/privacy.html" />
+    <link rel="stylesheet" href="/content-pages.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="page-header-inner">
+        <a class="brand" href="/" aria-label="LuminaBG home">LuminaBG</a>
+        <nav class="page-nav" aria-label="Main navigation">
+          <a href="/how-to-remove-image-background.html">How it works</a>
+          <a class="primary-link" href="/">Open the remover</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page-main">
+      <article class="article">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Home</a> &rsaquo; Image processing &amp; privacy
+        </nav>
+        <p class="eyebrow">Clear choices, per image</p>
+        <h1>Where your image goes depends on the engine you choose</h1>
+        <p class="lede">LuminaBG offers on-device processing and optional cloud models. Check the selected engine before you start if an image is sensitive.</p>
+
+        <h2>Browser engine: processed on your device</h2>
+        <p>The Browser engine runs the background-removal model in your browser tab. The app does not send your original image to its Vercel processing endpoint when you use this engine. Your browser still needs to download the model files needed to run it.</p>
+
+        <h2>remove.bg engine: sent to the remove.bg API</h2>
+        <p>If you select remove.bg, the app sends the image to a LuminaBG serverless function, which forwards it to the remove.bg API and returns the processed PNG. The function removes its temporary upload file during the request. The remove.bg service processes the image, so its own handling and retention terms apply.</p>
+
+        <h2>Hugging Face models: sent to the configured Space</h2>
+        <p>If you choose U2-Net, U2-Net-P, ISNet, BiRefNet, or Silueta, the browser sends the image to the configured Hugging Face Space for processing and retrieves the result from that Space. The Space operator and Hugging Face service handle that request under their own practices and terms.</p>
+
+        <aside class="callout">
+          <p><strong>In short:</strong> choose Browser when you want the image processed on-device. Choosing a remote engine means the image is sent to that engine's provider. LuminaBG does not create user accounts or an image library; this app code does not intentionally save user images to a LuminaBG account or database.</p>
+        </aside>
+
+        <h2>What the app stores in your browser</h2>
+        <p>LuminaBG saves your light or dark theme preference in your browser's local storage. The app does not ask you to create an account. The image processing and download flow is session-based; no image gallery is provided.</p>
+
+        <h2>Questions or corrections</h2>
+        <p>For code-level questions, visit the <a href="https://github.com/AMRITO-KUNDU/Image-Background-Remover">LuminaBG source repository</a>. For the most current details about third-party processing, consult the selected provider's own privacy and service information.</p>
+        <a class="page-cta" href="/">Choose an engine</a>
+      </article>
+    </main>
+
+    <footer class="page-footer">
+      <div class="page-footer-inner">
+        <p>&copy; <span id="year">2026</span> LuminaBG</p>
+        <a href="/how-to-remove-image-background.html">How to remove an image background</a>
+      </div>
+    </footer>
+  </body>
+</html>

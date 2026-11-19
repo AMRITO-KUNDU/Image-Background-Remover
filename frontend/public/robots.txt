@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://image-background-remover-lake.vercel.app/sitemap.xml
